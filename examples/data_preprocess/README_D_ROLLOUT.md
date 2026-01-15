@@ -13,27 +13,35 @@ The D_rollout dataset generation process:
 
 ### Dataset Format
 
-The output D_rollout dataset contains entries in the format:
+The output D_rollout dataset contains entries in the D_expert compatible format:
 ```json
 {
-  "state_i": "observation text at state i",
-  "action_j": "alternative action j",
-  "state_j": "resulting observation text after executing action_j from state_i",
-  "reward": 0.0,
-  "done": false,
-  "step": 0,
-  "expert_action": "expert's chosen action"
+  "task_id": "trial_T20190908_110055_655553",
+  "idx": 1,
+  "id": "traj_0001_step001_alt1",
+  "task": "put a cool mug in coffeemachine.",
+  "step": 1,
+  "state_si": {
+    "current_state": "You have taken the action 1: 'go to coffeemachine 1', action 2: 'take mug 1 from coffeemachine 1' You are now at step 3 and your current observation is: You pick up the mug 1 from the coffeemachine 1."
+  },
+  "expert_action_ai": "go to coffeemachine 1",
+  "alternative_action_j": "go to fridge 1",
+  "next_state_sji": "You arrive at fridge 1. On the fridge 1, you see a apple 1, a bowl 2, a bowl 1, a egg 1, a lettuce 1, a mug 2, a potato 2, and a potato 1.",
+  "is_expert": false
 }
 ```
 
 Where:
-- `state_i`: The observation text at state i in the expert trajectory
-- `action_j`: An alternative action sampled (different from expert action)
-- `state_j`: The resulting state after executing action_j from state_i
-- `reward`: Reward received from the environment
-- `done`: Whether the episode ended
-- `step`: Step index in the original expert trajectory
-- `expert_action`: The action the expert agent chose (for reference)
+- `task_id`: Unique identifier for the episode/task
+- `idx`: Trajectory index (episode number)
+- `id`: Unique identifier for this entry (format: traj_XXXX_stepXXX_altX)
+- `task`: Task description/goal
+- `step`: Step number in the trajectory (1-indexed)
+- `state_si.current_state`: Full state with action history and current observation
+- `expert_action_ai`: The action the expert agent chose
+- `alternative_action_j`: An alternative action sampled (different from expert action)
+- `next_state_sji`: The resulting state after executing alternative_action_j
+- `is_expert`: Boolean flag (false for alternative actions, would be true for expert actions)
 
 ## Usage
 

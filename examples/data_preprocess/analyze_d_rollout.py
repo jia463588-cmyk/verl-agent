@@ -31,30 +31,51 @@ def load_d_rollout_data(filepath: str) -> List[Dict]:
 
 def compute_basic_statistics(data: List[Dict]) -> Dict:
     """Compute basic statistics about the D_rollout dataset."""
+    # Handle both old and new format
+    def get_state_key(entry):
+        if 'state_si' in entry:
+            return entry['state_si'].get('current_state', '')
+        return entry.get('state_i', '')
+    
+    def get_action_key(entry):
+        return entry.get('alternative_action_j', entry.get('action_j', ''))
+    
     stats = {
         'total_entries': len(data),
-        'unique_states': len(set(entry['state_i'] for entry in data)),
-        'unique_actions': len(set(entry['action_j'] for entry in data)),
+        'unique_states': len(set(get_state_key(entry) for entry in data)),
+        'unique_actions': len(set(get_action_key(entry) for entry in data)),
         'steps_distribution': Counter(entry['step'] for entry in data),
     }
     
     # Compute average alternatives per state
     states_count = defaultdict(int)
     for entry in data:
-        states_count[entry['state_i']] += 1
+        states_count[get_state_key(entry)] += 1
     
     if states_count:
         stats['avg_alternatives_per_state'] = sum(states_count.values()) / len(states_count)
         stats['min_alternatives_per_state'] = min(states_count.values())
         stats['max_alternatives_per_state'] = max(states_count.values())
     
+    # Add task-level statistics if available
+    if any('task_id' in entry for entry in data):
+        stats['unique_tasks'] = len(set(entry.get('task_id', '') for entry in data))
+        stats['unique_trajectories'] = len(set(entry.get('idx', -1) for entry in data))
+    
     return stats
 
 
 def analyze_action_distribution(data: List[Dict]) -> Dict:
     """Analyze distribution of actions."""
-    action_counts = Counter(entry['action_j'] for entry in data)
-    expert_action_counts = Counter(entry.get('expert_action', '') for entry in data if entry.get('expert_action'))
+    # Handle both old and new format
+    def get_alt_action(entry):
+        return entry.get('alternative_action_j', entry.get('action_j', ''))
+    
+    def get_expert_action(entry):
+        return entry.get('expert_action_ai', entry.get('expert_action', ''))
+    
+    action_counts = Counter(get_alt_action(entry) for entry in data)
+    expert_action_counts = Counter(get_expert_action(entry) for entry in data if get_expert_action(entry))
     
     return {
         'total_unique_alternative_actions': len(action_counts),
@@ -66,18 +87,33 @@ def analyze_action_distribution(data: List[Dict]) -> Dict:
 
 def analyze_outcome_comparison(data: List[Dict]) -> Dict:
     """Analyze outcomes of alternative vs expert actions."""
-    if not any('reward' in entry for entry in data):
-        return {'note': 'Reward information not available in dataset'}
+    # New format doesn't have reward, check for next_state_sji existence
+    has_next_state = any('next_state_sji' in entry for entry in data)
     
-    alternative_rewards = [entry['reward'] for entry in data if 'reward' in entry]
-    done_count = sum(1 for entry in data if entry.get('done', False))
+    if not has_next_state and not any('reward' in entry for entry in data):
+        return {'note': 'Outcome information not available in dataset'}
     
-    return {
-        'alternative_action_done_rate': done_count / len(data) if data else 0,
-        'avg_alternative_reward': sum(alternative_rewards) / len(alternative_rewards) if alternative_rewards else 0,
-        'max_alternative_reward': max(alternative_rewards) if alternative_rewards else 0,
-        'min_alternative_reward': min(alternative_rewards) if alternative_rewards else 0,
-    }
+    stats = {}
+    
+    # Check for reward-based metrics (old format)
+    if any('reward' in entry for entry in data):
+        alternative_rewards = [entry['reward'] for entry in data if 'reward' in entry]
+        done_count = sum(1 for entry in data if entry.get('done', False))
+        
+        stats.update({
+            'alternative_action_done_rate': done_count / len(data) if data else 0,
+            'avg_alternative_reward': sum(alternative_rewards) / len(alternative_rewards) if alternative_rewards else 0,
+            'max_alternative_reward': max(alternative_rewards) if alternative_rewards else 0,
+            'min_alternative_reward': min(alternative_rewards) if alternative_rewards else 0,
+        })
+    
+    # Add new format metrics
+    if has_next_state:
+        completed_transitions = sum(1 for entry in data if entry.get('next_state_sji', ''))
+        stats['completed_transitions'] = completed_transitions
+        stats['completion_rate'] = completed_transitions / len(data) if data else 0
+    
+    return stats
 
 
 def analyze_step_distribution(data: List[Dict]) -> Dict:
@@ -86,12 +122,20 @@ def analyze_step_distribution(data: List[Dict]) -> Dict:
     for entry in data:
         step_data[entry['step']].append(entry)
     
+    def get_state_key(entry):
+        if 'state_si' in entry:
+            return entry['state_si'].get('current_state', '')
+        return entry.get('state_i', '')
+    
+    def get_action_key(entry):
+        return entry.get('alternative_action_j', entry.get('action_j', ''))
+    
     step_stats = {}
     for step, entries in step_data.items():
         step_stats[step] = {
             'count': len(entries),
-            'unique_states': len(set(e['state_i'] for e in entries)),
-            'unique_actions': len(set(e['action_j'] for e in entries)),
+            'unique_states': len(set(get_state_key(e) for e in entries)),
+            'unique_actions': len(set(get_action_key(e) for e in entries)),
         }
     
     return {
@@ -105,22 +149,38 @@ def check_data_quality(data: List[Dict]) -> Dict:
     """Check data quality and identify potential issues."""
     issues = []
     
-    # Check for required fields
-    required_fields = ['state_i', 'action_j', 'state_j', 'step']
+    # Detect format (old vs new)
+    is_new_format = any('task_id' in entry for entry in data)
+    
+    # Check for required fields based on format
+    if is_new_format:
+        required_fields = ['task_id', 'idx', 'id', 'task', 'step', 'state_si', 
+                          'expert_action_ai', 'alternative_action_j', 'next_state_sji', 'is_expert']
+    else:
+        required_fields = ['state_i', 'action_j', 'state_j', 'step']
+    
     for i, entry in enumerate(data):
         missing_fields = [f for f in required_fields if f not in entry]
         if missing_fields:
             issues.append(f"Entry {i}: Missing fields {missing_fields}")
     
-    # Check for empty states or actions
-    empty_states = sum(1 for entry in data if not entry.get('state_i', '').strip())
-    empty_actions = sum(1 for entry in data if not entry.get('action_j', '').strip())
-    empty_next_states = sum(1 for entry in data if entry.get('state_j') is not None and not entry['state_j'].strip())
+    # Check for empty states or actions based on format
+    if is_new_format:
+        empty_states = sum(1 for entry in data if 'state_si' in entry and not entry['state_si'].get('current_state', '').strip())
+        empty_actions = sum(1 for entry in data if not entry.get('alternative_action_j', '').strip())
+        empty_next_states = sum(1 for entry in data if entry.get('next_state_sji') is not None and not entry['next_state_sji'].strip())
+    else:
+        empty_states = sum(1 for entry in data if not entry.get('state_i', '').strip())
+        empty_actions = sum(1 for entry in data if not entry.get('action_j', '').strip())
+        empty_next_states = sum(1 for entry in data if entry.get('state_j') is not None and not entry['state_j'].strip())
     
     # Check for duplicate entries
     entry_signatures = []
     for entry in data:
-        sig = (entry.get('state_i', ''), entry.get('action_j', ''), entry.get('step', -1))
+        if is_new_format:
+            sig = (entry.get('id', ''), entry.get('task_id', ''))
+        else:
+            sig = (entry.get('state_i', ''), entry.get('action_j', ''), entry.get('step', -1))
         entry_signatures.append(sig)
     duplicate_count = len(entry_signatures) - len(set(entry_signatures))
     

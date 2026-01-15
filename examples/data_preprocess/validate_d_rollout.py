@@ -44,17 +44,24 @@ def validate_readme_exists():
 
 def validate_data_format():
     """Validate the expected D_rollout data format."""
-    expected_fields = ['state_i', 'action_j', 'state_j', 'step', 'expert_action']
+    # New D_expert compatible format
+    expected_fields = ['task_id', 'idx', 'id', 'task', 'step', 'state_si', 
+                       'expert_action_ai', 'alternative_action_j', 'next_state_sji', 'is_expert']
     
-    # Create sample entry
+    # Create sample entry in new format
     sample_entry = {
-        'state_i': 'You are in a kitchen. You see a countertop.',
-        'action_j': 'go to countertop 1',
-        'state_j': 'You arrive at countertop 1.',
-        'reward': 0.0,
-        'done': False,
-        'step': 0,
-        'expert_action': 'go to fridge 1',
+        'task_id': 'trial_T20190908_110055_655553',
+        'idx': 1,
+        'id': 'traj_0001_step001_alt1',
+        'task': 'put a cool mug in coffeemachine.',
+        'step': 1,
+        'state_si': {
+            'current_state': "You have taken the action 1: 'go to coffeemachine 1'. You are now at step 2 and your current observation is: You arrive at coffeemachine 1."
+        },
+        'expert_action_ai': 'go to coffeemachine 1',
+        'alternative_action_j': 'go to fridge 1',
+        'next_state_sji': 'You arrive at fridge 1. On the fridge 1, you see a apple 1.',
+        'is_expert': False
     }
     
     # Validate all expected fields exist

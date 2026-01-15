@@ -346,7 +346,9 @@ def generate_d_rollout_with_replay(
     trajectory: List[Dict],
     action_sampler: AlternativeActionSampler,
     env_idx: int = 0,
-    k: int = 3
+    k: int = 3,
+    task_id: str = None,
+    traj_idx: int = 0
 ) -> List[Dict]:
     """
     Generate D_rollout by replaying trajectory and branching at each step.
@@ -361,14 +363,32 @@ def generate_d_rollout_with_replay(
     - Limiting the number of steps processed
     
     Returns:
-        List of rollout entries with actual state transitions
+        List of rollout entries with actual state transitions in D_expert compatible format
     """
     d_rollout_entries = []
+    
+    # Extract task information from first trajectory step if available
+    if len(trajectory) > 0 and 'info' in trajectory[0]:
+        first_info = trajectory[0]['info']
+        task_desc = first_info.get('extra.goal_description', 'unknown task')
+        gamefile = first_info.get('extra.gamefile', '')
+    else:
+        task_desc = 'unknown task'
+        gamefile = ''
+    
+    # Generate task_id if not provided
+    if task_id is None:
+        task_id = f'trial_T{datetime.now().strftime("%Y%m%d_%H%M%S_%f")}'
     
     for step_idx, traj_step in enumerate(trajectory):
         # Reset environment and replay trajectory up to this step
         obs, infos = env_manager.reset({})
         info = infos[env_idx]
+        
+        # Build action history for state_si
+        action_history = []
+        for replay_idx in range(step_idx):
+            action_history.append(f"action {replay_idx + 1}: '{trajectory[replay_idx]['expert_action']}'")
         
         # Replay expert actions up to current step
         for replay_idx in range(step_idx):
@@ -379,20 +399,26 @@ def generate_d_rollout_with_replay(
             info = infos[env_idx]
         
         # Now we're at state s_i
-        state_i = obs['text'][env_idx]
+        current_obs = obs['text'][env_idx]
         expert_action = traj_step['expert_action']
         admissible_commands = info.get('admissible_commands', [])
         
+        # Build current_state with action history
+        if action_history:
+            current_state = f"You have taken the {', '.join(action_history)}. You are now at step {step_idx + 1} and your current observation is: {current_obs}"
+        else:
+            current_state = f"You are now at step {step_idx + 1} and your current observation is: {current_obs}"
+        
         # Sample alternative actions
         alternative_actions = action_sampler.sample_alternative_actions(
-            current_state=state_i,
+            current_state=current_obs,
             admissible_commands=admissible_commands,
             expert_action=expert_action,
             k=k
         )
         
         # Execute each alternative action
-        for alt_action in alternative_actions:
+        for alt_idx, alt_action in enumerate(alternative_actions):
             # Need to reset and replay again for each alternative
             obs_branch, infos_branch = env_manager.reset({})
             
@@ -409,18 +435,22 @@ def generate_d_rollout_with_replay(
             obs_alt, rewards_alt, dones_alt, infos_alt = env_manager.step(actions_alt)
             
             # Get resulting state
-            state_j = obs_alt['text'][env_idx]
-            reward_j = rewards_alt[env_idx]
-            done_j = dones_alt[env_idx]
+            next_state = obs_alt['text'][env_idx]
             
+            # Create entry in D_expert compatible format
             rollout_entry = {
-                'state_i': state_i,
-                'action_j': alt_action,
-                'state_j': state_j,
-                'reward': reward_j,
-                'done': done_j,
-                'step': step_idx,
-                'expert_action': expert_action,
+                'task_id': task_id,
+                'idx': traj_idx,
+                'id': f'traj_{traj_idx:04d}_step{step_idx + 1:03d}_alt{alt_idx + 1}',
+                'task': task_desc,
+                'step': step_idx + 1,
+                'state_si': {
+                    'current_state': current_state
+                },
+                'expert_action_ai': expert_action,
+                'alternative_action_j': alt_action,
+                'next_state_sji': next_state,
+                'is_expert': False
             }
             d_rollout_entries.append(rollout_entry)
     
@@ -508,13 +538,18 @@ def main():
             
             # Generate D_rollout entries from trajectory
             if len(trajectory) > 0:
+                # Generate unique task_id for this episode
+                task_id = f'trial_T{datetime.now().strftime("%Y%m%d_%H%M%S_%f")}'
+                
                 if args.use_replay:
                     d_rollout_entries = generate_d_rollout_with_replay(
                         env_manager,
                         trajectory,
                         action_sampler,
                         env_idx=0,
-                        k=args.k
+                        k=args.k,
+                        task_id=task_id,
+                        traj_idx=episode_idx
                     )
                 else:
                     d_rollout_entries = generate_d_rollout_from_trajectory(

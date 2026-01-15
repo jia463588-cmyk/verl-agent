@@ -38,10 +38,18 @@ import copy
 import random
 
 # Environment and agent imports
+import sys
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../../'))
+
 from agent_system.environments.env_manager import AlfWorldEnvironmentManager
 from agent_system.environments.env_package.alfworld import alfworld_projection
 from agent_system.environments.env_package.alfworld import build_alfworld_envs
-from agent_system.environments.env_package.alfworld.alfworld.agents.expert.handcoded_expert_tw import (
+
+# Import expert policies from alfworld package
+# Note: These need the alfworld environment package to be installed
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), 
+                                '../../agent_system/environments/env_package/alfworld'))
+from alfworld.agents.expert.handcoded_expert_tw import (
     PickAndPlaceSimpleTWPolicy,
     PickTwoObjAndPlaceTWPolicy,
     LookAtObjInLightTWPolicy,

@@ -454,6 +454,26 @@ Developers are encouraged to extend this module with custom memory strategies, s
 ## 2. Data Preparation
 For most environments (e.g., AFLWorld, WebShop, Sokoban), we only use data preparation to indicate the modality, either "text" or "visual". For example, if the task is purely text-based, the data will just be an empty string "". If it involves visual input, it will be "\<image\>". As for agent input (including task instruction, observation and prompt), we follow the classical RL pipeline. That means the input of LLM agent comes from the environment's feedback through `env.step()`. In the case of search-r1 experiments where tasks are drawn from a dataset, we leverage the [env_kwargs](./examples/data_preprocess/preprocess_search_r1_dataset.py#L90) parameter to pass tasks into the environment, using: [envs.reset(kwargs=gen_batch.non_tensor_batch.pop('env_kwargs', None))](./agent_system/multi_turn_rollout/rollout_loop.py#L301).
 
+### D_rollout Dataset Generation
+
+For advanced use cases, we provide a tool to generate **D_rollout** datasets from expert trajectories. This is useful for:
+- Creating diverse rollout data for offline RL training
+- Analyzing alternative action outcomes
+- Improving agent training with counterfactual experiences
+
+The D_rollout generator collects expert trajectories and, for each state, samples K alternative actions (different from the expert's choice) and executes them to observe the resulting states. The output format is: `D_rollout = {(s_i, a_j, s_j) | i ∈ [N], j ∈ [K]}`.
+
+**Quick Start:**
+```bash
+# Generate D_rollout dataset with 100 episodes, 3 alternatives per state
+bash examples/data_preprocess/run_generate_d_rollout.sh 100 3
+
+# For more options and details
+python3 -m examples.data_preprocess.generate_d_rollout --help
+```
+
+See [examples/data_preprocess/README_D_ROLLOUT.md](./examples/data_preprocess/README_D_ROLLOUT.md) for detailed documentation.
+
 ## 3. Customize Your Own Prompts  
 We adopt a simple and minimal prompt format in our implementation. For example, in the WebShop environment:
 ```

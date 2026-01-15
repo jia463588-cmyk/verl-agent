@@ -174,10 +174,43 @@ df.to_parquet('data/d_rollout/d_rollout.parquet')
 
 ## Requirements
 
-- ALFWorld environment installed
-- verl-agent framework
-- Python 3.8+
-- Ray (for parallel environment execution)
+Before running the D_rollout generation, ensure you have:
+
+1. **Install verl-agent**:
+   ```bash
+   cd /path/to/verl-agent
+   pip install -e .
+   ```
+
+2. **Install ALFWorld environment**:
+   The ALFWorld environment is included in the repository under:
+   `agent_system/environments/env_package/alfworld/`
+   
+   Install its dependencies:
+   ```bash
+   cd agent_system/environments/env_package/alfworld
+   pip install -e .
+   ```
+
+3. **Core dependencies**:
+   - Python 3.8+
+   - PyTorch
+   - Ray (for parallel environment execution)
+   - transformers
+   - Other dependencies from requirements.txt
+
+### Quick Installation
+
+```bash
+# Install verl-agent and all dependencies
+cd /path/to/verl-agent
+pip install -e .
+pip install -r requirements.txt
+
+# Install ALFWorld
+cd agent_system/environments/env_package/alfworld
+pip install -e .
+```
 
 ## Troubleshooting
 

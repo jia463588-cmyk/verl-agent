@@ -259,6 +259,22 @@ python3 -m examples.data_preprocess.generate_d_rollout \
     --seed 42
 ```
 
+### Analyze Generated Dataset
+
+After generation, analyze the dataset to understand its characteristics:
+
+```bash
+python3 examples/data_preprocess/analyze_d_rollout.py \
+    data/d_rollout/d_rollout.jsonl \
+    --output data/d_rollout/analysis_report.json
+```
+
+This will show:
+- Basic statistics (total entries, unique states/actions)
+- Action distribution analysis
+- Outcome comparisons
+- Data quality checks
+
 ## References
 
 Based on the methodology described in the GiGPO paper for generating diverse rollout data from expert trajectories to improve agent training.

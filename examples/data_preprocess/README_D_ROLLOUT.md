@@ -4,12 +4,25 @@ This module generates D_rollout datasets from expert trajectories for ALFWorld e
 
 ## Overview
 
-The D_rollout dataset generation process:
+The D_rollout dataset generation process supports two modes:
 
-1. **Collect Expert Trajectories (D_expert)**: Run expert agents to collect successful trajectories
+### Mode 1: From Pre-collected Expert Trajectories (Recommended)
+
+If you already have expert trajectory data (D_expert) in JSON format:
+
+1. **Load Expert Trajectories**: Load pre-collected expert trajectories from JSON file
 2. **Sample Alternative Actions**: For each state s_i in expert trajectories, sample K=3 alternative actions different from the expert action
 3. **Execute Actions**: Execute each alternative action to observe the resulting state s_j
 4. **Store Rollout Data**: Store tuples (s_i, a_j, s_j) for all states and alternative actions
+
+### Mode 2: Collect Expert Trajectories from Scratch
+
+If you don't have expert data yet:
+
+1. **Collect Expert Trajectories**: Run expert agents to collect successful trajectories
+2. **Sample Alternative Actions**: For each state s_i, sample K=3 alternative actions
+3. **Execute Actions**: Execute each alternative action to observe the resulting state s_j
+4. **Store Rollout Data**: Store tuples (s_i, a_j, s_j)
 
 ### Dataset Format
 
@@ -45,13 +58,28 @@ Where:
 
 ## Usage
 
-### Quick Start
+### Mode 1: Using Pre-collected Expert Data (Recommended)
+
+If you have expert trajectory data in `dexpert_test.json`:
+
+```bash
+cd /home/runner/work/verl-agent/verl-agent
+bash examples/data_preprocess/run_generate_d_rollout.sh dexpert_test.json 3 1.0 data/d_rollout
+```
+
+This will:
+- Load expert trajectories from `dexpert_test.json`
+- Sample 3 alternative actions per state
+- Use temperature 1.0 for sampling
+- Save output to `data/d_rollout/`
+
+### Mode 2: Collecting Expert Trajectories from Scratch
 
 Run the generation script with default parameters:
 
 ```bash
 cd /home/runner/work/verl-agent/verl-agent
-bash examples/data_preprocess/run_generate_d_rollout.sh
+bash examples/data_preprocess/run_generate_d_rollout.sh 100 3 50 1.0 data/d_rollout
 ```
 
 This will:
@@ -75,6 +103,17 @@ bash examples/data_preprocess/run_generate_d_rollout.sh 200 3 50 1.0 data/my_rol
 
 Use the Python script directly for more control:
 
+**With pre-collected expert data:**
+```bash
+python3 -m examples.data_preprocess.generate_d_rollout \
+    --expert_file dexpert_test.json \
+    --k 3 \
+    --temperature 1.0 \
+    --output_dir data/d_rollout \
+    --log_level INFO
+```
+
+**Collecting expert trajectories from scratch:**
 ```bash
 python3 -m examples.data_preprocess.generate_d_rollout \
     --num_episodes 100 \
@@ -88,18 +127,33 @@ python3 -m examples.data_preprocess.generate_d_rollout \
 
 ### Parameters
 
-- `--num_episodes`: Number of expert episodes to collect (default: 100)
+- `--expert_file`: Path to expert trajectory JSON file (if provided, will load expert data instead of collecting)
+- `--num_episodes`: Number of expert episodes to collect (default: 100, only used if --expert_file not provided)
 - `--k`: Number of alternative actions to sample per state (default: 3)
-- `--max_steps`: Maximum steps per episode (default: 50)
+- `--max_steps`: Maximum steps per episode (default: 50, only used if collecting trajectories)
 - `--temperature`: Sampling temperature for alternative actions (default: 1.0)
 - `--output_dir`: Output directory for D_rollout dataset (default: data/d_rollout)
-- `--use_replay`: Use replay method to execute actions and get actual resulting states (recommended)
+- `--use_replay`: Use replay method to execute actions and get actual resulting states (only used if collecting trajectories)
 - `--seed`: Random seed for reproducibility (default: 42)
 - `--log_level`: Logging level (default: INFO)
 
 ## Implementation Details
 
-### Expert Agent
+### Two Modes of Operation
+
+**Mode 1: From Pre-collected Expert Data (Recommended)**
+- Loads expert trajectories from JSON file
+- No need to run expert agents
+- Faster and more efficient
+- Use when you have D_expert data already
+
+**Mode 2: Collect from Scratch**
+- Uses handcoded expert agents from ALFWorld
+- Collects expert trajectories on-the-fly
+- Slower but self-contained
+- Use when starting fresh
+
+### Expert Agent (Mode 2 only)
 
 The implementation uses handcoded expert agents from ALFWorld that can solve tasks with high success rates:
 - `PickAndPlaceSimpleTWPolicy`

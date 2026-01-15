@@ -457,19 +457,176 @@ def generate_d_rollout_with_replay(
     return d_rollout_entries
 
 
+def load_expert_trajectories_from_file(filepath: str) -> List[Dict]:
+    """
+    Load expert trajectories from a JSON file.
+    
+    Expected format: List of expert trajectory entries, each containing:
+    - task_id: unique task identifier
+    - idx: trajectory index
+    - id: entry id
+    - task: task description
+    - step: step number
+    - state_si: state information with current_state
+    - expert_action_ai: expert's action
+    - (potentially) next_state_sji: next state after expert action
+    - is_expert: True for expert trajectories
+    
+    Returns:
+        List of expert trajectory dictionaries grouped by task_id
+    """
+    logging.info(f"Loading expert trajectories from {filepath}")
+    
+    with open(filepath, 'r', encoding='utf-8') as f:
+        expert_data = json.load(f)
+    
+    # Group by task_id to reconstruct trajectories
+    trajectories_by_task = defaultdict(list)
+    for entry in expert_data:
+        task_id = entry.get('task_id', 'unknown')
+        trajectories_by_task[task_id].append(entry)
+    
+    # Sort each trajectory by step number
+    trajectories = []
+    for task_id, entries in trajectories_by_task.items():
+        sorted_entries = sorted(entries, key=lambda x: x.get('step', 0))
+        trajectories.append({
+            'task_id': task_id,
+            'task': sorted_entries[0].get('task', 'unknown'),
+            'idx': sorted_entries[0].get('idx', 0),
+            'steps': sorted_entries
+        })
+    
+    logging.info(f"Loaded {len(trajectories)} expert trajectories")
+    return trajectories
+
+
+def generate_d_rollout_from_expert_file(
+    env_manager,
+    expert_trajectories: List[Dict],
+    action_sampler: AlternativeActionSampler,
+    env_idx: int = 0,
+    k: int = 3
+) -> List[Dict]:
+    """
+    Generate D_rollout from pre-collected expert trajectories.
+    
+    For each step in each expert trajectory:
+    1. Set up the environment to that state by replaying expert actions
+    2. Sample K alternative actions (different from expert action)
+    3. Execute each alternative action to get next_state_sji
+    4. Store in D_expert compatible format
+    
+    Args:
+        env_manager: Environment manager
+        expert_trajectories: List of expert trajectory dictionaries
+        action_sampler: Action sampler for generating alternatives
+        env_idx: Environment index to use
+        k: Number of alternative actions per state
+        
+    Returns:
+        List of D_rollout entries
+    """
+    all_d_rollout_entries = []
+    
+    for traj_data in expert_trajectories:
+        task_id = traj_data['task_id']
+        task_desc = traj_data['task']
+        traj_idx = traj_data['idx']
+        expert_steps = traj_data['steps']
+        
+        logging.info(f"Processing trajectory {traj_idx} (task_id: {task_id}) with {len(expert_steps)} steps")
+        
+        for step_entry in expert_steps:
+            step_num = step_entry.get('step', 1)
+            expert_action = step_entry.get('expert_action_ai', '')
+            state_si = step_entry.get('state_si', {})
+            current_state = state_si.get('current_state', '')
+            
+            # Reset environment and replay expert actions up to this step
+            obs, infos = env_manager.reset({})
+            info = infos[env_idx]
+            
+            # Replay expert actions from previous steps
+            for prev_step_entry in expert_steps[:step_num - 1]:
+                prev_action = prev_step_entry.get('expert_action_ai', '')
+                if prev_action:
+                    actions = ["None"] * env_manager.num_processes
+                    actions[env_idx] = prev_action
+                    obs, _, _, infos = env_manager.step(actions)
+                    info = infos[env_idx]
+            
+            # Get admissible commands at current state
+            admissible_commands = info.get('admissible_commands', [])
+            
+            # Sample alternative actions
+            alternative_actions = action_sampler.sample_alternative_actions(
+                current_state=current_state,
+                admissible_commands=admissible_commands,
+                expert_action=expert_action,
+                k=k
+            )
+            
+            if len(alternative_actions) == 0:
+                logging.debug(f"No alternative actions at step {step_num}, skipping")
+                continue
+            
+            # Execute each alternative action
+            for alt_idx, alt_action in enumerate(alternative_actions):
+                # Reset and replay again for each alternative
+                obs_branch, infos_branch = env_manager.reset({})
+                
+                # Replay up to current step
+                for prev_step_entry in expert_steps[:step_num - 1]:
+                    prev_action = prev_step_entry.get('expert_action_ai', '')
+                    if prev_action:
+                        actions_replay = ["None"] * env_manager.num_processes
+                        actions_replay[env_idx] = prev_action
+                        obs_branch, _, _, infos_branch = env_manager.step(actions_replay)
+                
+                # Execute alternative action
+                actions_alt = ["None"] * env_manager.num_processes
+                actions_alt[env_idx] = alt_action
+                obs_alt, _, _, _ = env_manager.step(actions_alt)
+                
+                # Get resulting state
+                next_state = obs_alt['text'][env_idx]
+                
+                # Create entry in D_expert compatible format
+                rollout_entry = {
+                    'task_id': task_id,
+                    'idx': traj_idx,
+                    'id': step_entry.get('id', f'traj_{traj_idx:04d}_step{step_num:03d}') + f'_alt{alt_idx + 1}',
+                    'task': task_desc,
+                    'step': step_num,
+                    'state_si': state_si,
+                    'expert_action_ai': expert_action,
+                    'alternative_action_j': alt_action,
+                    'next_state_sji': next_state,
+                    'is_expert': False
+                }
+                all_d_rollout_entries.append(rollout_entry)
+        
+        logging.info(f"Generated {len([e for e in all_d_rollout_entries if e['task_id'] == task_id])} rollout entries for trajectory {traj_idx}")
+    
+    return all_d_rollout_entries
+
+
 def main():
     parser = argparse.ArgumentParser(description='Generate D_rollout dataset from expert trajectories')
+    parser.add_argument('--expert_file', type=str, default=None,
+                       help='Path to expert trajectory JSON file (if provided, will use this instead of collecting)')
     parser.add_argument('--config_path', type=str, 
                        default='agent_system/environments/env_package/alfworld/configs/config_tw.yaml',
                        help='Path to ALFWorld config file')
     parser.add_argument('--output_dir', type=str, default='data/d_rollout',
                        help='Output directory for D_rollout dataset')
     parser.add_argument('--num_episodes', type=int, default=100,
-                       help='Number of expert episodes to collect')
+                       help='Number of expert episodes to collect (only used if --expert_file not provided)')
     parser.add_argument('--k', type=int, default=3,
                        help='Number of alternative actions per state')
     parser.add_argument('--max_steps', type=int, default=50,
-                       help='Maximum steps per episode')
+                       help='Maximum steps per episode (only used if collecting trajectories)')
     parser.add_argument('--seed', type=int, default=42,
                        help='Random seed')
     parser.add_argument('--temperature', type=float, default=1.0,
@@ -505,67 +662,108 @@ def main():
     config_path = os.path.join(os.path.dirname(__file__), '../../', args.config_path)
     env_manager = build_alfworld_env(config_path, env_num=1, seed=args.seed, is_train=False)
     
-    # Initialize expert agent and action sampler
-    expert_agent = ExpertAgent(max_steps=args.max_steps)
+    # Initialize action sampler
     action_sampler = AlternativeActionSampler(temperature=args.temperature, use_model=False)
     
-    # Collect expert trajectories and generate D_rollout
+    # Generate D_rollout
     all_d_rollout_entries = []
-    successful_episodes = 0
-    failed_episodes = 0
     
-    logging.info(f"Collecting {args.num_episodes} expert trajectories...")
-    
-    for episode_idx in range(args.num_episodes):
-        logging.info(f"\n{'='*60}")
-        logging.info(f"Episode {episode_idx + 1}/{args.num_episodes}")
+    # Check if expert file is provided
+    if args.expert_file:
+        # Load pre-collected expert trajectories from file
+        logging.info(f"Loading expert trajectories from {args.expert_file}")
         
-        try:
-            # Collect expert trajectory
-            trajectory, success = collect_expert_trajectory(
-                env_manager, 
-                expert_agent, 
-                env_idx=0,
-                max_steps=args.max_steps
-            )
+        if not os.path.exists(args.expert_file):
+            logging.error(f"Expert file not found: {args.expert_file}")
+            return 1
+        
+        expert_trajectories = load_expert_trajectories_from_file(args.expert_file)
+        
+        # Generate D_rollout from expert file
+        all_d_rollout_entries = generate_d_rollout_from_expert_file(
+            env_manager,
+            expert_trajectories,
+            action_sampler,
+            env_idx=0,
+            k=args.k
+        )
+        
+        logging.info(f"Generated {len(all_d_rollout_entries)} total rollout entries from expert file")
+        
+    else:
+        # Collect expert trajectories and generate D_rollout (original behavior)
+        logging.info("No expert file provided, collecting expert trajectories from scratch...")
+        
+        # Initialize expert agent
+        expert_agent = ExpertAgent(max_steps=args.max_steps)
+        
+        successful_episodes = 0
+        failed_episodes = 0
+        
+        logging.info(f"Collecting {args.num_episodes} expert trajectories...")
+        
+        for episode_idx in range(args.num_episodes):
+            logging.info(f"\n{'='*60}")
+            logging.info(f"Episode {episode_idx + 1}/{args.num_episodes}")
             
-            if success:
-                successful_episodes += 1
-                logging.info(f"Expert succeeded in {len(trajectory)} steps")
-            else:
-                failed_episodes += 1
-                logging.info(f"Expert failed/timed out after {len(trajectory)} steps")
-            
-            # Generate D_rollout entries from trajectory
-            if len(trajectory) > 0:
-                # Generate unique task_id for this episode
-                task_id = f'trial_T{datetime.now().strftime("%Y%m%d_%H%M%S_%f")}'
+            try:
+                # Collect expert trajectory
+                trajectory, success = collect_expert_trajectory(
+                    env_manager, 
+                    expert_agent, 
+                    env_idx=0,
+                    max_steps=args.max_steps
+                )
                 
-                if args.use_replay:
-                    d_rollout_entries = generate_d_rollout_with_replay(
-                        env_manager,
-                        trajectory,
-                        action_sampler,
-                        env_idx=0,
-                        k=args.k,
-                        task_id=task_id,
-                        traj_idx=episode_idx
-                    )
+                if success:
+                    successful_episodes += 1
+                    logging.info(f"Expert succeeded in {len(trajectory)} steps")
                 else:
-                    d_rollout_entries = generate_d_rollout_from_trajectory(
-                        env_manager,
-                        trajectory,
-                        action_sampler,
-                        env_idx=0,
-                        k=args.k
-                    )
+                    failed_episodes += 1
+                    logging.info(f"Expert failed/timed out after {len(trajectory)} steps")
                 
-                all_d_rollout_entries.extend(d_rollout_entries)
-                logging.info(f"Generated {len(d_rollout_entries)} rollout entries")
-            
-        except Exception as e:
-            logging.error(f"Error in episode {episode_idx}: {e}", exc_info=True)
-            failed_episodes += 1
+                # Generate D_rollout entries from trajectory
+                if len(trajectory) > 0:
+                    # Generate unique task_id for this episode
+                    task_id = f'trial_T{datetime.now().strftime("%Y%m%d_%H%M%S_%f")}'
+                    
+                    if args.use_replay:
+                        d_rollout_entries = generate_d_rollout_with_replay(
+                            env_manager,
+                            trajectory,
+                            action_sampler,
+                            env_idx=0,
+                            k=args.k,
+                            task_id=task_id,
+                            traj_idx=episode_idx
+                        )
+                    else:
+                        d_rollout_entries = generate_d_rollout_from_trajectory(
+                            env_manager,
+                            trajectory,
+                            action_sampler,
+                            env_idx=0,
+                            k=args.k
+                        )
+                    
+                    all_d_rollout_entries.extend(d_rollout_entries)
+                    logging.info(f"Generated {len(d_rollout_entries)} rollout entries")
+                
+            except Exception as e:
+                logging.error(f"Error in episode {episode_idx}: {e}", exc_info=True)
+                failed_episodes += 1
+        
+        # Statistics for collected trajectories
+        stats = {
+            'num_episodes': args.num_episodes,
+            'successful_episodes': successful_episodes,
+            'failed_episodes': failed_episodes,
+            'total_rollout_entries': len(all_d_rollout_entries),
+            'k': args.k,
+            'max_steps': args.max_steps,
+            'temperature': args.temperature,
+            'use_replay': args.use_replay,
+        }
     
     # Save D_rollout dataset
     output_file = os.path.join(args.output_dir, 'd_rollout.jsonl')
@@ -576,16 +774,17 @@ def main():
             f.write(json.dumps(entry, ensure_ascii=False) + '\n')
     
     # Save statistics
-    stats = {
-        'num_episodes': args.num_episodes,
-        'successful_episodes': successful_episodes,
-        'failed_episodes': failed_episodes,
-        'total_rollout_entries': len(all_d_rollout_entries),
-        'k': args.k,
-        'max_steps': args.max_steps,
-        'temperature': args.temperature,
-        'use_replay': args.use_replay,
-    }
+    if args.expert_file:
+        stats = {
+            'expert_file': args.expert_file,
+            'num_trajectories': len(expert_trajectories) if args.expert_file else 0,
+            'total_rollout_entries': len(all_d_rollout_entries),
+            'k': args.k,
+            'temperature': args.temperature,
+        }
+    else:
+        # stats already defined above in the else block
+        pass
     
     stats_file = os.path.join(args.output_dir, 'statistics.json')
     with open(stats_file, 'w', encoding='utf-8') as f:
@@ -593,9 +792,13 @@ def main():
     
     logging.info(f"\n{'='*60}")
     logging.info("D_rollout generation complete!")
-    logging.info(f"Total episodes: {args.num_episodes}")
-    logging.info(f"Successful: {successful_episodes}")
-    logging.info(f"Failed: {failed_episodes}")
+    if args.expert_file:
+        logging.info(f"Expert file: {args.expert_file}")
+        logging.info(f"Trajectories processed: {len(expert_trajectories)}")
+    else:
+        logging.info(f"Total episodes: {args.num_episodes}")
+        logging.info(f"Successful: {successful_episodes}")
+        logging.info(f"Failed: {failed_episodes}")
     logging.info(f"Total rollout entries: {len(all_d_rollout_entries)}")
     logging.info(f"Output: {output_file}")
     logging.info(f"Statistics: {stats_file}")

@@ -278,3 +278,31 @@ This will show:
 ## References
 
 Based on the methodology described in the GiGPO paper for generating diverse rollout data from expert trajectories to improve agent training.
+
+**Citation:**
+```bibtex
+@article{feng2025group,
+  title={Group-in-Group Policy Optimization for LLM Agent Training},
+  author={Feng, Lang and Xue, Zhenghai and Liu, Tingcong and An, Bo},
+  journal={arXiv preprint arXiv:2505.10978},
+  year={2025}
+}
+```
+
+**Paper Link:** https://arxiv.org/abs/2505.10978
+
+## Performance Considerations
+
+### Time Complexity
+The replay method has O(n²k) complexity where:
+- n = trajectory length (number of steps)
+- k = alternatives per state (default: 3)
+
+For a 50-step trajectory with k=3, this results in approximately 3,750 environment steps.
+
+### Optimization Strategies
+1. **Limit trajectory length**: Use `--max_steps` to cap episode length
+2. **Reduce alternatives**: Lower k value (e.g., k=2)
+3. **Early stopping**: Only process first N steps of each trajectory
+4. **Parallel processing**: Process multiple episodes simultaneously (future enhancement)
+5. **State checkpointing**: If environment supports it (future enhancement)

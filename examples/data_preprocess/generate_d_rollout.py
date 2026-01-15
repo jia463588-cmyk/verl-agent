@@ -114,9 +114,11 @@ class AlternativeActionSampler:
         self.model = None
         
         if use_model and model_path:
-            # TODO: Initialize model for inference
-            # This would require loading a model and tokenizer
-            logging.warning("Model-based sampling not implemented yet, using uniform sampling")
+            logging.warning(
+                "Model-based sampling not yet implemented. "
+                "Falling back to uniform sampling from admissible commands. "
+                "To implement: load model/tokenizer and add inference in sample_alternative_actions()"
+            )
             self.use_model = False
     
     def sample_alternative_actions(
@@ -128,6 +130,14 @@ class AlternativeActionSampler:
     ) -> List[str]:
         """
         Sample k alternative actions different from expert action.
+        
+        Current implementation uses uniform sampling from admissible commands.
+        
+        To extend with model-based sampling:
+        1. Set use_model=True and provide model_path during initialization
+        2. Implement model inference here to generate actions
+        3. Validate generated actions against admissible_commands
+        4. Fall back to uniform sampling for invalid actions
         
         Args:
             current_state: Current observation text
@@ -277,20 +287,25 @@ def generate_d_rollout_from_trajectory(
     k: int = 3
 ) -> List[Dict]:
     """
-    Generate D_rollout entries from a single expert trajectory.
+    Generate D_rollout entries from a single expert trajectory (metadata only).
+    
+    DEPRECATED: This method only stores metadata without executing actions.
+    Use generate_d_rollout_with_replay() instead for accurate state transitions.
     
     For each state s_i in trajectory:
         1. Sample k alternative actions
-        2. Execute each action to get new state s_j
-        3. Store (s_i, a_j, s_j)
+        2. Store (s_i, a_j, None) where state_j is not computed
+    
+    This method is kept for reference but use_replay=True is recommended.
     
     Returns:
-        List of rollout entries, each containing:
-            - state_i: initial state
-            - action_j: alternative action
-            - state_j: resulting state
-            - step: trajectory step index
+        List of rollout entries with state_j=None
     """
+    logging.warning(
+        "Using basic method without replay - state_j will be None. "
+        "Consider using generate_d_rollout_with_replay() with --use_replay flag."
+    )
+    
     d_rollout_entries = []
     
     for traj_step in trajectory:
@@ -311,18 +326,12 @@ def generate_d_rollout_from_trajectory(
             logging.debug(f"No alternative actions at step {step_idx}, skipping")
             continue
         
-        # For each alternative action, get the resulting state
+        # Store metadata without executing actions
         for alt_action in alternative_actions:
-            # Reset environment to this trajectory step's state
-            # Note: This requires environment state restoration, which may not be
-            # directly supported. Alternative: replay trajectory up to this point
-            
-            # For now, we'll store the action without executing it
-            # A full implementation would need environment state management
             rollout_entry = {
                 'state_i': state_i,
                 'action_j': alt_action,
-                'state_j': None,  # Would need to execute action to get this
+                'state_j': None,  # Not computed in basic method
                 'step': step_idx,
                 'expert_action': expert_action,
                 'admissible_commands': admissible_commands,
@@ -344,6 +353,15 @@ def generate_d_rollout_with_replay(
     
     This implementation replays the expert trajectory up to each step,
     then executes alternative actions to observe the resulting states.
+    
+    Note: This method has O(n²k) complexity where n is trajectory length 
+    and k is alternatives per step. For large trajectories, consider:
+    - Using environment state checkpointing (if available)
+    - Processing trajectories in parallel
+    - Limiting the number of steps processed
+    
+    Returns:
+        List of rollout entries with actual state transitions
     """
     d_rollout_entries = []
     

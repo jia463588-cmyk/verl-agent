@@ -14,31 +14,32 @@ import os
 import sys
 import json
 import tempfile
+from pathlib import Path
 
 
 def validate_script_exists():
     """Check that the main script exists."""
-    script_path = os.path.join(os.path.dirname(__file__), 'generate_d_rollout.py')
-    assert os.path.exists(script_path), f"Main script not found: {script_path}"
+    script_path = Path(__file__).parent / 'generate_d_rollout.py'
+    assert script_path.exists(), f"Main script not found: {script_path}"
     print("✓ Main script exists")
-    return script_path
+    return str(script_path)
 
 
 def validate_shell_script_exists():
     """Check that the shell script exists."""
-    script_path = os.path.join(os.path.dirname(__file__), 'run_generate_d_rollout.sh')
-    assert os.path.exists(script_path), f"Shell script not found: {script_path}"
+    script_path = Path(__file__).parent / 'run_generate_d_rollout.sh'
+    assert script_path.exists(), f"Shell script not found: {script_path}"
     assert os.access(script_path, os.X_OK), f"Shell script not executable: {script_path}"
     print("✓ Shell script exists and is executable")
-    return script_path
+    return str(script_path)
 
 
 def validate_readme_exists():
     """Check that README exists."""
-    readme_path = os.path.join(os.path.dirname(__file__), 'README_D_ROLLOUT.md')
-    assert os.path.exists(readme_path), f"README not found: {readme_path}"
+    readme_path = Path(__file__).parent / 'README_D_ROLLOUT.md'
+    assert readme_path.exists(), f"README not found: {readme_path}"
     print("✓ README exists")
-    return readme_path
+    return str(readme_path)
 
 
 def validate_data_format():

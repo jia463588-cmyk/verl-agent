@@ -14,16 +14,16 @@
 # limitations under the License.
 
 """
-Generate D_rollout dataset from expert trajectories (D_expert).
+从专家轨迹（D_expert）生成 D_rollout 数据集。
 
-For each state s_i in expert trajectories:
-1. Sample K=3 alternative actions different from the expert action
-2. Use model inference with temperature=1.0 for sampling
-3. Filter actions using environment admissible commands
-4. Execute each alternative action to get new state s_j
-5. Store tuples (s_i, a_j, s_j) where j ∈ [K]
+对于专家轨迹中的每个状态 s_i：
+1. 采样 K=3 个不同于专家动作的替代动作
+2. 使用温度=1.0 的模型推理进行采样
+3. 使用环境的可执行命令过滤动作
+4. 执行每个替代动作以获取新状态 s_j
+5. 存储元组 (s_i, a_j, s_j)，其中 j ∈ [K]
 
-Output format: D_rollout = {(s_i, a_j, s_j) | i ∈ [N], j ∈ [K]}
+输出格式：D_rollout = {(s_i, a_j, s_j) | i ∈ [N], j ∈ [K]}
 """
 
 import os
@@ -37,7 +37,7 @@ from collections import defaultdict
 import copy
 import random
 
-# Environment and agent imports
+# 环境和智能体导入
 import sys
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../../'))
 
@@ -45,8 +45,8 @@ from agent_system.environments.env_manager import AlfWorldEnvironmentManager
 from agent_system.environments.env_package.alfworld import alfworld_projection
 from agent_system.environments.env_package.alfworld import build_alfworld_envs
 
-# Import expert policies from alfworld package
-# Note: These need the alfworld environment package to be installed
+# 从 alfworld 包导入专家策略
+# 注意：这些需要安装 alfworld 环境包
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 
                                 '../../agent_system/environments/env_package/alfworld'))
 from alfworld.agents.expert.handcoded_expert_tw import (
@@ -60,7 +60,7 @@ from alfworld.agents.expert.handcoded_expert_tw import (
 
 
 class ExpertAgent:
-    """Expert agent using handcoded policies for ALFWorld tasks."""
+    """使用 ALFWorld 任务的手工编码策略的专家智能体。"""
     
     TASK_TYPES = {
         'pick_and_place': PickAndPlaceSimpleTWPolicy,
@@ -76,38 +76,38 @@ class ExpertAgent:
         self.policies = {}
     
     def get_task_type(self, gamefile: str) -> str:
-        """Determine task type from gamefile path."""
+        """从游戏文件路径确定任务类型。"""
         for task_type in self.TASK_TYPES.keys():
             if task_type in gamefile:
                 return task_type
         return None
     
     def get_policy(self, task_type: str, task_params: dict):
-        """Get or create policy for task type."""
+        """获取或创建任务类型的策略。"""
         if task_type not in self.policies:
             policy_class = self.TASK_TYPES.get(task_type)
             if policy_class is None:
-                raise ValueError(f"Unknown task type: {task_type}")
+                raise ValueError(f"未知的任务类型: {task_type}")
             self.policies[task_type] = policy_class(task_params, self.max_steps)
         return self.policies[task_type]
     
     def act(self, game_state: dict, task_type: str, task_params: dict, last_action: str = ""):
-        """Get expert action for current state."""
+        """获取当前状态的专家动作。"""
         policy = self.get_policy(task_type, task_params)
         return policy.act(game_state, last_action)
 
 
 class AlternativeActionSampler:
-    """Sample alternative actions using model inference or uniform sampling."""
+    """使用模型推理或均匀采样来采样替代动作。"""
     
     def __init__(self, temperature=1.0, use_model=False, model_path=None):
         """
-        Initialize alternative action sampler.
+        初始化替代动作采样器。
         
-        Args:
-            temperature: Sampling temperature for model inference
-            use_model: Whether to use model for sampling (if False, use uniform sampling)
-            model_path: Path to model for inference (optional)
+        参数:
+            temperature: 模型推理的采样温度
+            use_model: 是否使用模型进行采样（如果为 False，使用均匀采样）
+            model_path: 模型推理的路径（可选）
         """
         self.temperature = temperature
         self.use_model = use_model
@@ -115,9 +115,9 @@ class AlternativeActionSampler:
         
         if use_model and model_path:
             logging.warning(
-                "Model-based sampling not yet implemented. "
-                "Falling back to uniform sampling from admissible commands. "
-                "To implement: load model/tokenizer and add inference in sample_alternative_actions()"
+                "基于模型的采样尚未实现。"
+                "回退到从可执行命令的均匀采样。"
+                "要实现：加载模型/分词器并在 sample_alternative_actions() 中添加推理"
             )
             self.use_model = False
     
@@ -129,15 +129,15 @@ class AlternativeActionSampler:
         k: int = 3
     ) -> List[str]:
         """
-        Sample k alternative actions different from expert action.
+        采样 k 个不同于专家动作的替代动作。
         
-        Current implementation uses uniform sampling from admissible commands.
+        当前实现使用从可执行命令的均匀采样。
         
-        To extend with model-based sampling:
-        1. Set use_model=True and provide model_path during initialization
-        2. Implement model inference here to generate actions
-        3. Validate generated actions against admissible_commands
-        4. Fall back to uniform sampling for invalid actions
+        扩展为基于模型的采样：
+        1. 在初始化时设置 use_model=True 并提供 model_path
+        2. 在此处实现模型推理以生成动作
+        3. 根据 admissible_commands 验证生成的动作
+        4. 对于无效动作回退到均匀采样
         
         Args:
             current_state: Current observation text

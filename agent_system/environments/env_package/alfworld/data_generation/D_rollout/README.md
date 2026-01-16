@@ -1,32 +1,20 @@
-# D_rollout Dataset Generation
+# D_rollout Dataset Generation Tool
 
-This module generates D_rollout datasets from expert trajectories for ALFWorld environments, based on the GiGPO paper methodology.
+This module generates D_rollout datasets from pre-collected expert trajectories (D_expert) for the ALFWorld environment, based on the GiGPO paper methodology.
 
 ## Overview
 
-The D_rollout dataset generation process supports two modes:
+D_rollout dataset generation workflow:
 
-### Mode 1: From Pre-collected Expert Trajectories (Recommended)
-
-If you already have expert trajectory data (D_expert) in JSON format:
-
-1. **Load Expert Trajectories**: Load pre-collected expert trajectories from JSON file
-2. **Sample Alternative Actions**: For each state s_i in expert trajectories, sample K=3 alternative actions different from the expert action
-3. **Execute Actions**: Execute each alternative action to observe the resulting state s_j
-4. **Store Rollout Data**: Store tuples (s_i, a_j, s_j) for all states and alternative actions
-
-### Mode 2: Collect Expert Trajectories from Scratch
-
-If you don't have expert data yet:
-
-1. **Collect Expert Trajectories**: Run expert agents to collect successful trajectories
-2. **Sample Alternative Actions**: For each state s_i, sample K=3 alternative actions
-3. **Execute Actions**: Execute each alternative action to observe the resulting state s_j
-4. **Store Rollout Data**: Store tuples (s_i, a_j, s_j)
+1. **Load expert trajectories**: Load pre-collected expert trajectories from JSON file (e.g., `dexpert_test.json`)
+2. **Sample alternative actions**: For each state s_i in expert trajectories, sample K alternative actions different from the expert action
+3. **Execute actions**: Execute each alternative action in the ALFWorld environment to observe the resulting state s_j
+4. **Store rollout data**: Store all state transition tuples (s_i, a_j, s_j)
 
 ### Dataset Format
 
-The output D_rollout dataset contains entries in the D_expert compatible format:
+Output D_rollout dataset uses JSONL format compatible with D_expert:
+
 ```json
 {
   "task_id": "trial_T20190908_110055_655553",
@@ -44,354 +32,183 @@ The output D_rollout dataset contains entries in the D_expert compatible format:
 }
 ```
 
-Where:
-- `task_id`: Unique identifier for the episode/task
+**Field descriptions:**
+- `task_id`: Unique identifier for the task/trajectory
 - `idx`: Trajectory index (episode number)
-- `id`: Unique identifier for this entry (format: traj_XXXX_stepXXX_altX)
+- `id`: Unique entry ID (format: traj_XXXX_stepXXX_altX)
 - `task`: Task description/goal
-- `step`: Step number in the trajectory (1-indexed)
+- `step`: Step number in trajectory (1-indexed)
 - `state_si.current_state`: Full state with action history and current observation
-- `expert_action_ai`: The action the expert agent chose
-- `alternative_action_j`: An alternative action sampled (different from expert action)
-- `next_state_sji`: The resulting state after executing alternative_action_j
-- `is_expert`: Boolean flag (false for alternative actions, would be true for expert actions)
+- `expert_action_ai`: Action chosen by expert agent
+- `alternative_action_j`: Sampled alternative action (different from expert action)
+- `next_state_sji`: Resulting state after executing alternative_action_j
+- `is_expert`: Boolean flag (false for alternative actions)
 
 ## Usage
 
-### Offline Model Support (New Feature)
-
-The tool now supports loading offline models from local paths for action sampling:
+### Basic Usage
 
 ```bash
-# Using offline model with expert data
-bash agent_system/environments/env_package/alfworld/data_generation/run_generate_d_rollout.sh \
-    dexpert_test.json 3 1.0 data/d_rollout /path/to/your/local/model
+# Navigate to project root
+cd /home/runner/work/verl-agent/verl-agent
 
-# Or with Python directly
-python3 -m agent_system.environments.env_package.alfworld.data_generation.generate_d_rollout \
-    --expert_file dexpert_test.json \
+# Generate D_rollout with default parameters
+bash agent_system/environments/env_package/alfworld/data_generation/D_rollout/run_generate_d_rollout.sh \
+    agent_system/environments/env_package/alfworld/data_generation/D_rollout/dexpert_test.json
+```
+
+### Custom Parameters
+
+```bash
+bash agent_system/environments/env_package/alfworld/data_generation/D_rollout/run_generate_d_rollout.sh \
+    <expert_file> [K] [temperature] [output_dir] [model_path]
+```
+
+**Parameters:**
+- `<expert_file>` (required): Path to expert trajectory JSON file
+- `[K]` (optional, default 3): Number of alternative actions to sample per state
+- `[temperature]` (optional, default 1.0): Sampling temperature
+- `[output_dir]` (optional, default data/d_rollout): Output directory
+- `[model_path]` (optional): Local path to offline model (if provided, uses model sampling)
+
+**Examples:**
+
+```bash
+# Example 1: Default parameters
+bash agent_system/environments/env_package/alfworld/data_generation/D_rollout/run_generate_d_rollout.sh \
+    agent_system/environments/env_package/alfworld/data_generation/D_rollout/dexpert_test.json
+
+# Example 2: Custom K and output directory
+bash agent_system/environments/env_package/alfworld/data_generation/D_rollout/run_generate_d_rollout.sh \
+    agent_system/environments/env_package/alfworld/data_generation/D_rollout/dexpert_test.json 5 1.0 my_output
+
+# Example 3: With offline model
+bash agent_system/environments/env_package/alfworld/data_generation/D_rollout/run_generate_d_rollout.sh \
+    agent_system/environments/env_package/alfworld/data_generation/D_rollout/dexpert_test.json 3 1.0 data/d_rollout /path/to/local/model
+```
+
+### Direct Python Invocation
+
+```bash
+python3 -m agent_system.environments.env_package.alfworld.data_generation.D_rollout.generate_d_rollout \
+    --expert_file agent_system/environments/env_package/alfworld/data_generation/D_rollout/dexpert_test.json \
+    --k 3 \
+    --temperature 1.0 \
+    --output_dir data/d_rollout
+```
+
+### Using Offline Model for Action Sampling
+
+The tool supports loading offline models from local paths for intelligent action sampling:
+
+```bash
+python3 -m agent_system.environments.env_package.alfworld.data_generation.D_rollout.generate_d_rollout \
+    --expert_file agent_system/environments/env_package/alfworld/data_generation/D_rollout/dexpert_test.json \
     --k 3 \
     --use_model \
     --model_path /path/to/your/local/model \
     --output_dir data/d_rollout
 ```
 
-**Model Requirements:**
+**Model requirements:**
 - Model must be saved locally (offline model)
 - Supports Hugging Face transformers format
 - Must include model weights and tokenizer files
 - Automatically sets `local_files_only=True` and `trust_remote_code=True`
 
-**Note:** If `--model_path` is not provided, the system will use uniform sampling by default.
-
-### Mode 1: Using Pre-collected Expert Data (Recommended)
-
-If you have expert trajectory data in `dexpert_test.json`:
-
-```bash
-cd /home/runner/work/verl-agent/verl-agent
-bash agent_system/environments/env_package/alfworld/data_generation/run_generate_d_rollout.sh \
-    dexpert_test.json 3 1.0 data/d_rollout
-```
-
-This will:
-- Load expert trajectories from `dexpert_test.json`
-- Sample 3 alternative actions per state
-- Use temperature 1.0 for sampling
-- Save output to `data/d_rollout/`
-
-### Mode 2: Collecting Expert Trajectories from Scratch
-
-Run the generation script with default parameters:
-
-```bash
-cd /home/runner/work/verl-agent/verl-agent
-bash examples/data_preprocess/run_generate_d_rollout.sh 100 3 50 1.0 data/d_rollout
-```
-
-This will:
-- Collect 100 expert trajectories
-- Sample 3 alternative actions per state
-- Use temperature 1.0 for sampling
-- Save output to `data/d_rollout/`
-
-### Custom Parameters
-
-```bash
-bash examples/data_preprocess/run_generate_d_rollout.sh NUM_EPISODES K MAX_STEPS TEMPERATURE OUTPUT_DIR
-```
-
-Example:
-```bash
-bash examples/data_preprocess/run_generate_d_rollout.sh 200 3 50 1.0 data/my_rollout
-```
-
-### Advanced Usage
-
-Use the Python script directly for more control:
-
-**With pre-collected expert data:**
-```bash
-python3 -m examples.data_preprocess.generate_d_rollout \
-    --expert_file dexpert_test.json \
-    --k 3 \
-    --temperature 1.0 \
-    --output_dir data/d_rollout \
-    --log_level INFO
-```
-
-**Collecting expert trajectories from scratch:**
-```bash
-python3 -m examples.data_preprocess.generate_d_rollout \
-    --num_episodes 100 \
-    --k 3 \
-    --max_steps 50 \
-    --temperature 1.0 \
-    --output_dir data/d_rollout \
-    --use_replay \
-    --log_level INFO
-```
-
-### Parameters
-
-- `--expert_file`: Path to expert trajectory JSON file (if provided, will load expert data instead of collecting)
-- `--num_episodes`: Number of expert episodes to collect (default: 100, only used if --expert_file not provided)
-- `--k`: Number of alternative actions to sample per state (default: 3)
-- `--max_steps`: Maximum steps per episode (default: 50, only used if collecting trajectories)
-- `--temperature`: Sampling temperature for alternative actions (default: 1.0)
-- `--output_dir`: Output directory for D_rollout dataset (default: data/d_rollout)
-- `--use_replay`: Use replay method to execute actions and get actual resulting states (only used if collecting trajectories)
-- `--seed`: Random seed for reproducibility (default: 42)
-- `--log_level`: Logging level (default: INFO)
-
-## Implementation Details
-
-### Two Modes of Operation
-
-**Mode 1: From Pre-collected Expert Data (Recommended)**
-- Loads expert trajectories from JSON file
-- No need to run expert agents
-- Faster and more efficient
-- Use when you have D_expert data already
-
-**Mode 2: Collect from Scratch**
-- Uses handcoded expert agents from ALFWorld
-- Collects expert trajectories on-the-fly
-- Slower but self-contained
-- Use when starting fresh
-
-### Expert Agent (Mode 2 only)
-
-The implementation uses handcoded expert agents from ALFWorld that can solve tasks with high success rates:
-- `PickAndPlaceSimpleTWPolicy`
-- `PickTwoObjAndPlaceTWPolicy`
-- `LookAtObjInLightTWPolicy`
-- `PickHeatThenPlaceInRecepTWPolicy`
-- `PickCoolThenPlaceInRecepTWPolicy`
-- `PickCleanThenPlaceInRecepTWPolicy`
-
-### Alternative Action Sampling
-
-Currently implements uniform sampling from admissible commands (actions valid in the current state). The sampling:
-- Filters out the expert action to ensure alternatives are different
-- Samples K actions uniformly from remaining admissible commands
-- Falls back to sampling with replacement if fewer than K alternatives exist
-
-**Future Enhancement**: Model-based sampling using LLM inference with temperature=1.0 can be added by:
-1. Loading a pretrained model
-2. Generating action text with specified temperature
-3. Validating against admissible commands
-
-### Replay Method
-
-The `--use_replay` option enables trajectory replay to get actual resulting states:
-1. For each step i in expert trajectory:
-   - Reset environment
-   - Replay expert actions 0..i-1
-   - Execute alternative action j
-   - Observe resulting state s_j
-
-This ensures accurate state transitions but requires more computation.
+**Note:** If `--model_path` is not provided, the system uses uniform sampling by default.
 
 ## Output Files
 
-The generation process creates:
+Generated files are saved in the specified output directory:
 
-1. **d_rollout.jsonl**: Main dataset file with rollout entries (one JSON per line)
-2. **statistics.json**: Statistics about the generation process
-3. **logs/generate_d_rollout_*.log**: Detailed execution log
+- `d_rollout.jsonl`: Main data file containing all (s_i, a_j, s_j) tuples
+- `d_rollout_stats.json`: Statistics file
 
-### Statistics File
+## Data Analysis
 
-```json
-{
-  "num_episodes": 100,
-  "successful_episodes": 85,
-  "failed_episodes": 15,
-  "total_rollout_entries": 4250,
-  "k": 3,
-  "max_steps": 50,
-  "temperature": 1.0,
-  "use_replay": true
-}
-```
-
-## Integration with verl-agent
-
-The generated D_rollout dataset can be used:
-
-1. **For Training**: Convert to parquet format and use with verl-agent trainers
-2. **For Analysis**: Analyze state-action distributions and transition dynamics
-3. **For Evaluation**: Compare alternative action outcomes with expert actions
-
-### Converting to Training Format
-
-```python
-import pandas as pd
-import json
-
-# Load D_rollout
-rollout_data = []
-with open('data/d_rollout/d_rollout.jsonl', 'r') as f:
-    for line in f:
-        rollout_data.append(json.loads(line))
-
-# Convert to DataFrame and save as parquet
-df = pd.DataFrame(rollout_data)
-df.to_parquet('data/d_rollout/d_rollout.parquet')
-```
-
-## Requirements
-
-Before running the D_rollout generation, ensure you have:
-
-1. **Install verl-agent**:
-   ```bash
-   cd /path/to/verl-agent
-   pip install -e .
-   ```
-
-2. **Install ALFWorld environment**:
-   The ALFWorld environment is included in the repository under:
-   `agent_system/environments/env_package/alfworld/`
-   
-   Install its dependencies:
-   ```bash
-   cd agent_system/environments/env_package/alfworld
-   pip install -e .
-   ```
-
-3. **Core dependencies**:
-   - Python 3.8+
-   - PyTorch
-   - Ray (for parallel environment execution)
-   - transformers
-   - Other dependencies from requirements.txt
-
-### Quick Installation
+Use the analysis tool to view dataset statistics:
 
 ```bash
-# Install verl-agent and all dependencies
-cd /path/to/verl-agent
-pip install -e .
-pip install -r requirements.txt
-
-# Install ALFWorld
-cd agent_system/environments/env_package/alfworld
-pip install -e .
+python3 agent_system/environments/env_package/alfworld/data_generation/D_rollout/analyze_d_rollout.py \
+    data/d_rollout/d_rollout.jsonl
 ```
 
-## Troubleshooting
+## Data Validation
 
-### Expert Agent Failures
-
-If expert agents fail frequently:
-- Check task types are correctly identified
-- Verify ALFWorld configuration is correct
-- Review logs for specific failure patterns
-
-### Memory Issues
-
-For large-scale generation:
-- Reduce `num_episodes` and run multiple batches
-- Process data in chunks
-- Use `--use_replay False` to reduce memory (though states won't be accurate)
-
-### Environment Issues
-
-If environment fails to initialize:
-- Check ALFWorld installation
-- Verify config path is correct
-- Ensure Ray is properly initialized
-
-## Examples
-
-### Generate Small Test Dataset
+Validate the generated dataset format:
 
 ```bash
-python3 -m examples.data_preprocess.generate_d_rollout \
-    --num_episodes 10 \
-    --k 3 \
-    --use_replay \
-    --output_dir data/d_rollout_test
+python3 agent_system/environments/env_package/alfworld/data_generation/D_rollout/validate_d_rollout.py \
+    data/d_rollout/d_rollout.jsonl
 ```
 
-### Generate Large Production Dataset
+## Tool Files
 
-```bash
-python3 -m examples.data_preprocess.generate_d_rollout \
-    --num_episodes 1000 \
-    --k 3 \
-    --max_steps 50 \
-    --use_replay \
-    --output_dir data/d_rollout_production \
-    --seed 42
-```
+1. **generate_d_rollout.py** (main generation script)
+   - Loads data from expert trajectory file
+   - Samples alternative actions (uniform or model-based)
+   - Executes actions in ALFWorld environment
+   - Generates D_rollout dataset
 
-### Analyze Generated Dataset
+2. **run_generate_d_rollout.sh** (shell wrapper script)
+   - Simplifies command-line invocation
+   - Handles parameter processing
 
-After generation, analyze the dataset to understand its characteristics:
+3. **analyze_d_rollout.py** (data analysis tool)
+   - Statistical analysis
+   - Action distribution analysis
+   - Data quality checks
 
-```bash
-python3 agent_system/environments/env_package/alfworld/data_generation/analyze_d_rollout.py \
-    data/d_rollout/d_rollout.jsonl \
-    --output data/d_rollout/analysis_report.json
-```
+4. **validate_d_rollout.py** (validation script)
+   - Validates data format
+   - Checks data integrity
 
-This will show:
-- Basic statistics (total entries, unique states/actions)
-- Action distribution analysis
-- Outcome comparisons
-- Data quality checks
+5. **dexpert_test.json** (sample expert trajectory data)
+   - Contains expert trajectories for two tasks
+   - Used for testing and demonstration
+
+## FAQ
+
+### 1. How to prepare expert trajectory files?
+
+Expert trajectory files should be in JSON format with the following fields:
+- `task_id`: Task identifier
+- `idx`: Trajectory index
+- `step`: Step number
+- `state_si.current_state`: Current state
+- `expert_action_ai`: Expert action
+- `task`: Task description
+
+Refer to the sample file `dexpert_test.json`.
+
+### 2. What is the D_rollout dataset used for?
+
+D_rollout datasets are used for:
+- Offline reinforcement learning training
+- Counterfactual experience learning
+- Exploring outcomes of alternative actions
+- Improving agent decision-making quality
+
+### 3. How to adjust sampling strategy?
+
+- Increase K value to sample more alternative actions
+- Adjust temperature parameter to affect sampling randomness
+- Use `--use_model` and `--model_path` to enable model-based sampling
+
+## Technical Details
+
+- **Implementation method**: Trajectory Replay
+- **Complexity**: O(n²k), where n is expert trajectory length, k is number of alternative actions
+- **Sampling methods**:
+  - Default: Uniform sampling from admissible commands
+  - Optional: Intelligent sampling using offline model
+- **Environment**: ALFWorld (TextWorld-based interactive environment)
 
 ## References
 
-Based on the methodology described in the GiGPO paper for generating diverse rollout data from expert trajectories to improve agent training.
+Based on the D_rollout dataset generation methodology from the GiGPO paper.
 
-**Citation:**
-```bibtex
-@article{feng2025group,
-  title={Group-in-Group Policy Optimization for LLM Agent Training},
-  author={Feng, Lang and Xue, Zhenghai and Liu, Tingcong and An, Bo},
-  journal={arXiv preprint arXiv:2505.10978},
-  year={2025}
-}
-```
+## License
 
-**Paper Link:** https://arxiv.org/abs/2505.10978
-
-## Performance Considerations
-
-### Time Complexity
-The replay method has O(n²k) complexity where:
-- n = trajectory length (number of steps)
-- k = alternatives per state (default: 3)
-
-For a 50-step trajectory with k=3, this results in approximately 3,750 environment steps.
-
-### Optimization Strategies
-1. **Limit trajectory length**: Use `--max_steps` to cap episode length
-2. **Reduce alternatives**: Lower k value (e.g., k=2)
-3. **Early stopping**: Only process first N steps of each trajectory
-4. **Parallel processing**: Process multiple episodes simultaneously (future enhancement)
-5. **State checkpointing**: If environment supports it (future enhancement)
+Apache License 2.0

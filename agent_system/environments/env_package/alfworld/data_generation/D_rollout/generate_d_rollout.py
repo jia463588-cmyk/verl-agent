@@ -1,5 +1,5 @@
 # Copyright 2025 Nanyang Technological University (NTU), Singapore
-# and the verl-agent (GiGPO) team.
+# and the verl-agent team.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
 
 """
 从专家轨迹（D_expert）生成 D_rollout 数据集。
+
+基于论文：Agent learning via Early Experience
 
 对于专家轨迹中的每个状态 s_i：
 1. 采样 K=3 个不同于专家动作的替代动作
@@ -44,69 +46,143 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../../../../../../')
 from agent_system.environments.env_manager import AlfWorldEnvironmentManager
 from agent_system.environments.env_package.alfworld import alfworld_projection
 from agent_system.environments.env_package.alfworld import build_alfworld_envs
+from agent_system.environments.prompts.alfworld import ALFWORLD_TEMPLATE
 
 
 class AlternativeActionSampler:
-    """使用模型推理或均匀采样来采样替代动作。"""
+    """使用模型推理（基于 ALFWORLD_TEMPLATE 提示）来采样替代动作。"""
     
-    def __init__(self, temperature=1.0, use_model=False, model_path=None):
+    def __init__(self, temperature=1.0, model_path=None):
         """
         初始化替代动作采样器。
         
         参数:
             temperature: 模型推理的采样温度
-            use_model: 是否使用模型进行采样（如果为 False，使用均匀采样）
-            model_path: 离线模型的本地路径（如果提供，将从本地加载模型）
+            model_path: 离线模型的本地路径（必需）
         """
         self.temperature = temperature
-        self.use_model = use_model
         self.model = None
         self.tokenizer = None
         self.model_path = model_path
         
-        if use_model and model_path:
-            try:
-                # 尝试加载离线模型
-                logging.info(f"从本地路径加载模型: {model_path}")
-                from transformers import AutoModelForCausalLM, AutoTokenizer
-                
-                # 从本地路径加载模型和分词器
-                self.tokenizer = AutoTokenizer.from_pretrained(
-                    model_path,
-                    local_files_only=True,  # 只使用本地文件，不从网络下载
-                    trust_remote_code=True
-                )
-                self.model = AutoModelForCausalLM.from_pretrained(
-                    model_path,
-                    local_files_only=True,  # 只使用本地文件
-                    trust_remote_code=True,
-                    device_map="auto"  # 自动设备分配
-                )
-                self.model.eval()  # 设置为评估模式
-                logging.info("模型加载成功")
-                
-            except Exception as e:
-                logging.error(f"从本地路径加载模型失败: {e}")
-                logging.warning("回退到从可执行命令的均匀采样")
-                self.use_model = False
-                self.model = None
-                self.tokenizer = None
+        if not model_path:
+            raise ValueError("必须提供 model_path 参数以加载离线模型")
+        
+        try:
+            # 从本地路径加载离线模型
+            logging.info(f"从本地路径加载模型: {model_path}")
+            from transformers import AutoModelForCausalLM, AutoTokenizer
+            
+            # 从本地路径加载模型和分词器
+            self.tokenizer = AutoTokenizer.from_pretrained(
+                model_path,
+                local_files_only=True,  # 只使用本地文件，不从网络下载
+                trust_remote_code=True
+            )
+            self.model = AutoModelForCausalLM.from_pretrained(
+                model_path,
+                local_files_only=True,  # 只使用本地文件
+                trust_remote_code=True,
+                device_map="auto"  # 自动设备分配
+            )
+            self.model.eval()  # 设置为评估模式
+            logging.info("模型加载成功")
+            
+        except Exception as e:
+            logging.error(f"从本地路径加载模型失败: {e}")
+            raise RuntimeError(f"无法加载模型，请检查 model_path: {model_path}") from e
+    
+    def _parse_action_history_and_observation(self, current_state: str) -> Tuple[str, str]:
+        """
+        从 current_state 解析出动作历史和当前观察。
+        
+        current_state 格式示例：
+        "You have taken the action 1: 'go to coffeemachine 1', action 2: 'take mug 1 from coffeemachine 1' 
+         You are now at step 3 and your current observation is: You pick up the mug 1 from the coffeemachine 1."
+        
+        参数:
+            current_state: 完整的当前状态字符串
+            
+        返回:
+            (action_history, current_observation) 元组
+        """
+        # 查找 "your current observation is:" 分隔符
+        obs_marker = "your current observation is:"
+        
+        if obs_marker in current_state:
+            parts = current_state.split(obs_marker, 1)
+            action_history = parts[0].strip()
+            current_observation = parts[1].strip()
+        else:
+            # 如果没有动作历史（第一步），整个状态就是当前观察
+            action_history = ""
+            current_observation = current_state.strip()
+        
+        return action_history, current_observation
+    
+    def _construct_prompt(
+        self,
+        task_description: str,
+        step: int,
+        current_state: str,
+        admissible_commands: List[str]
+    ) -> str:
+        """
+        使用 ALFWORLD_TEMPLATE 构造提示。
+        
+        参数:
+            task_description: 任务描述（从 D_expert 的 task 字段）
+            step: 当前步骤编号（从 D_expert 的 step 字段）
+            current_state: 完整的当前状态（从 D_expert 的 state_si.current_state 字段）
+            admissible_commands: 可执行命令列表（从环境返回）
+            
+        返回:
+            构造的提示字符串
+        """
+        # 解析动作历史和当前观察
+        action_history, current_observation = self._parse_action_history_and_observation(current_state)
+        
+        # 计算步骤计数（已采取的步骤数）
+        step_count = step - 1
+        
+        # 历史长度等于已采取的步骤数（全历史）
+        history_length = step_count
+        
+        # 当前步骤
+        current_step = step
+        
+        # 格式化可执行命令
+        admissible_actions_str = ", ".join(admissible_commands)
+        
+        # 使用 ALFWORLD_TEMPLATE 构造提示
+        prompt = ALFWORLD_TEMPLATE.format(
+            task_description=task_description,
+            step_count=step_count,
+            history_length=history_length,
+            action_history=action_history,
+            current_step=current_step,
+            current_observation=current_observation,
+            admissible_actions=admissible_actions_str
+        )
+        
+        return prompt
     
     def sample_alternative_actions(
         self, 
+        task_description: str,
+        step: int,
         current_state: str,
         admissible_commands: List[str],
         expert_action: str,
         k: int = 3
     ) -> List[str]:
         """
-        采样 k 个不同于专家动作的替代动作。
-        
-        如果启用了模型，将使用模型推理生成动作。
-        否则使用从可执行命令的均匀采样。
+        使用模型推理采样 k 个不同于专家动作的替代动作。
         
         参数:
-            current_state: 当前观察文本
+            task_description: 任务描述
+            step: 当前步骤编号
+            current_state: 当前状态文本
             admissible_commands: 当前状态下的有效动作列表
             expert_action: 专家的动作（需排除）
             k: 要采样的替代动作数量
@@ -121,52 +197,72 @@ class AlternativeActionSampler:
             logging.warning("没有可用的替代动作，专家动作是唯一选项")
             return []
         
-        # 如果使用模型，尝试生成动作
-        if self.use_model and self.model is not None and self.tokenizer is not None:
+        # 使用模型生成动作
+        import torch
+        sampled_actions = []
+        
+        # 使用 ALFWORLD_TEMPLATE 构建提示
+        prompt = self._construct_prompt(
+            task_description=task_description,
+            step=step,
+            current_state=current_state,
+            admissible_commands=admissible_commands
+        )
+        
+        # 生成 k 个动作
+        max_attempts = k * 3  # 最多尝试次数
+        attempts = 0
+        
+        while len(sampled_actions) < k and attempts < max_attempts:
+            attempts += 1
+            
             try:
-                import torch
-                sampled_actions = []
+                inputs = self.tokenizer(prompt, return_tensors="pt").to(self.model.device)
                 
-                # 构建提示
-                prompt = f"状态: {current_state}\n可用动作: {', '.join(admissible_commands)}\n请选择一个动作："
+                with torch.no_grad():
+                    outputs = self.model.generate(
+                        **inputs,
+                        max_new_tokens=100,
+                        temperature=self.temperature,
+                        do_sample=True,
+                        pad_token_id=self.tokenizer.eos_token_id
+                    )
                 
-                # 生成 k 个动作
-                for _ in range(k):
-                    inputs = self.tokenizer(prompt, return_tensors="pt").to(self.model.device)
-                    
-                    with torch.no_grad():
-                        outputs = self.model.generate(
-                            **inputs,
-                            max_new_tokens=50,
-                            temperature=self.temperature,
-                            do_sample=True,
-                            pad_token_id=self.tokenizer.eos_token_id
-                        )
-                    
-                    generated_text = self.tokenizer.decode(outputs[0][inputs.input_ids.shape[1]:], skip_special_tokens=True)
+                generated_text = self.tokenizer.decode(
+                    outputs[0][inputs.input_ids.shape[1]:], 
+                    skip_special_tokens=True
+                )
+                
+                # 从生成的文本中提取动作
+                # 查找 <action> </action> 标签
+                action_start = generated_text.find("<action>")
+                action_end = generated_text.find("</action>")
+                
+                if action_start != -1 and action_end != -1:
+                    generated_action = generated_text[action_start + 8:action_end].strip()
+                else:
+                    # 如果没有标签，使用整个生成的文本
                     generated_action = generated_text.strip()
-                    
-                    # 验证生成的动作是否在可执行命令中
-                    if generated_action in alternative_commands:
-                        sampled_actions.append(generated_action)
-                    else:
-                        # 如果生成的动作无效，从替代命令中随机选择
-                        if alternative_commands:
-                            sampled_actions.append(random.choice(alternative_commands))
                 
-                if len(sampled_actions) == k:
-                    return sampled_actions
+                # 验证生成的动作是否在替代命令中且未被采样过
+                if generated_action in alternative_commands and generated_action not in sampled_actions:
+                    sampled_actions.append(generated_action)
+                    logging.debug(f"成功采样替代动作: {generated_action}")
+                else:
+                    logging.debug(f"生成的动作无效或重复: {generated_action}")
                     
             except Exception as e:
-                logging.warning(f"模型推理失败: {e}，回退到均匀采样")
+                logging.warning(f"模型推理失败 (尝试 {attempts}): {e}")
         
-        # 均匀采样（默认或回退方法）
-        if len(alternative_commands) < k:
-            # 替代选项不足，进行有放回采样
-            sampled_actions = random.choices(alternative_commands, k=k)
-        else:
-            # 有足够的替代选项，进行无放回采样
-            sampled_actions = random.sample(alternative_commands, k=k)
+        if len(sampled_actions) < k:
+            logging.warning(f"只成功采样了 {len(sampled_actions)} 个替代动作（目标 {k} 个）")
+            # 如果采样不足，从剩余的替代命令中随机选择
+            remaining = [cmd for cmd in alternative_commands if cmd not in sampled_actions]
+            needed = k - len(sampled_actions)
+            if remaining:
+                additional = random.sample(remaining, min(needed, len(remaining)))
+                sampled_actions.extend(additional)
+                logging.info(f"添加了 {len(additional)} 个随机替代动作以达到目标数量")
         
         return sampled_actions
 
@@ -294,8 +390,10 @@ def generate_d_rollout_from_expert_file(
             # 获取当前状态下的可执行命令
             admissible_commands = info.get('admissible_commands', [])
             
-            # 采样替代动作
+            # 采样替代动作（使用模型推理和 ALFWORLD_TEMPLATE）
             alternative_actions = action_sampler.sample_alternative_actions(
+                task_description=task_desc,
+                step=step_num,
                 current_state=current_state,
                 admissible_commands=admissible_commands,
                 expert_action=expert_action,
@@ -348,7 +446,7 @@ def generate_d_rollout_from_expert_file(
 
 
 def main():
-    parser = argparse.ArgumentParser(description='从专家轨迹生成 D_rollout 数据集')
+    parser = argparse.ArgumentParser(description='从专家轨迹生成 D_rollout 数据集（基于论文：Agent learning via Early Experience）')
     parser.add_argument('--expert_file', type=str, required=True,
                        help='专家轨迹 JSON 文件的路径')
     parser.add_argument('--config_path', type=str, 
@@ -362,10 +460,8 @@ def main():
                        help='随机种子')
     parser.add_argument('--temperature', type=float, default=1.0,
                        help='替代动作的采样温度')
-    parser.add_argument('--use_model', action='store_true',
-                       help='使用模型进行动作采样（默认：均匀采样）')
-    parser.add_argument('--model_path', type=str, default=None,
-                       help='用于动作采样的离线模型的本地路径')
+    parser.add_argument('--model_path', type=str, required=True,
+                       help='用于动作采样的离线模型的本地路径（必需）')
     parser.add_argument('--log_level', type=str, default='INFO',
                        help='日志级别')
     
@@ -403,11 +499,10 @@ def main():
         config_path = args.config_path
     env_manager = build_alfworld_env(config_path, env_num=1, seed=args.seed, is_train=False)
     
-    # 使用模型支持初始化动作采样器
-    logging.info(f"初始化动作采样器: use_model={args.use_model}, model_path={args.model_path}")
+    # 初始化动作采样器（使用离线模型）
+    logging.info(f"初始化动作采样器: model_path={args.model_path}, temperature={args.temperature}")
     action_sampler = AlternativeActionSampler(
         temperature=args.temperature, 
-        use_model=args.use_model,
         model_path=args.model_path
     )
     

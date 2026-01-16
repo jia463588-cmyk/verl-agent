@@ -1,15 +1,21 @@
 # D_rollout 数据集生成工具
 
-本模块基于 GiGPO 论文方法，从预收集的专家轨迹（D_expert）生成 D_rollout 数据集用于 ALFWorld 环境。
+本模块基于论文 **"Agent learning via Early Experience"**，从预收集的专家轨迹（D_expert）生成 D_rollout 数据集用于 ALFWorld 环境。
 
 ## 概述
 
 D_rollout 数据集生成流程：
 
 1. **加载专家轨迹**：从 JSON 文件（如 `dexpert_test.json`）加载预收集的专家轨迹
-2. **采样替代动作**：为专家轨迹中的每个状态 s_i 采样 K 个不同于专家动作的替代动作
+2. **采样替代动作**：为专家轨迹中的每个状态 s_i 使用**离线模型推理**采样 K 个不同于专家动作的替代动作
 3. **执行动作**：在 ALFWorld 环境中执行每个替代动作以观察产生的状态 s_j
 4. **存储 Rollout 数据**：存储所有状态转移元组 (s_i, a_j, s_j)
+
+### 重要特性
+
+- **必须使用模型推理**：替代动作必须由离线模型（base model）生成，不支持均匀采样
+- **使用 ALFWORLD_TEMPLATE 提示**：模型推理使用来自 `agent_system/environments/prompts/alfworld.py` 的标准提示模板
+- **完全离线**：支持从本地路径加载模型，无需网络连接
 
 ### 数据集格式
 
@@ -52,71 +58,75 @@ D_rollout 数据集生成流程：
 # 切换到项目根目录
 cd /home/runner/work/verl-agent/verl-agent
 
-# 使用默认参数生成 D_rollout
+# 使用离线模型生成 D_rollout（必需）
 bash agent_system/environments/env_package/alfworld/data_generation/D_rollout/run_generate_d_rollout.sh \
-    agent_system/environments/env_package/alfworld/data_generation/D_rollout/dexpert_test.json
+    agent_system/environments/env_package/alfworld/data_generation/D_rollout/dexpert_test.json \
+    /path/to/your/offline/model
 ```
 
 ### 自定义参数
 
 ```bash
 bash agent_system/environments/env_package/alfworld/data_generation/D_rollout/run_generate_d_rollout.sh \
-    <专家文件> [K] [温度] [输出目录] [模型路径]
+    <专家文件> <模型路径> [K] [温度] [输出目录]
 ```
 
 **参数说明：**
 - `<专家文件>`（必需）：专家轨迹 JSON 文件路径
+- `<模型路径>`（必需）：离线模型本地路径（用于生成替代动作）
 - `[K]`（可选，默认3）：每个状态采样的替代动作数量
-- `[温度]`（可选，默认1.0）：采样温度
+- `[温度]`（可选，默认1.0）：模型采样温度
 - `[输出目录]`（可选，默认data/d_rollout）：输出目录
-- `[模型路径]`（可选）：离线模型本地路径（如果提供则使用模型采样）
 
 **示例：**
 
 ```bash
 # 示例1：使用默认参数
 bash agent_system/environments/env_package/alfworld/data_generation/D_rollout/run_generate_d_rollout.sh \
-    agent_system/environments/env_package/alfworld/data_generation/D_rollout/dexpert_test.json
+    agent_system/environments/env_package/alfworld/data_generation/D_rollout/dexpert_test.json \
+    /path/to/model
 
-# 示例2：自定义 K 和输出目录
+# 示例2：自定义参数
 bash agent_system/environments/env_package/alfworld/data_generation/D_rollout/run_generate_d_rollout.sh \
-    agent_system/environments/env_package/alfworld/data_generation/D_rollout/dexpert_test.json 5 1.0 my_output
-
-# 示例3：使用离线模型
-bash agent_system/environments/env_package/alfworld/data_generation/D_rollout/run_generate_d_rollout.sh \
-    agent_system/environments/env_package/alfworld/data_generation/D_rollout/dexpert_test.json 3 1.0 data/d_rollout /path/to/local/model
+    agent_system/environments/env_package/alfworld/data_generation/D_rollout/dexpert_test.json \
+    /path/to/model \
+    5 \
+    0.8 \
+    data/my_rollout
 ```
 
-### 使用 Python 直接调用
+### 直接使用 Python
 
 ```bash
 python3 -m agent_system.environments.env_package.alfworld.data_generation.D_rollout.generate_d_rollout \
     --expert_file agent_system/environments/env_package/alfworld/data_generation/D_rollout/dexpert_test.json \
+    --model_path /path/to/your/offline/model \
     --k 3 \
     --temperature 1.0 \
     --output_dir data/d_rollout
 ```
 
-### 使用离线模型进行动作采样
+### 模型推理采样
 
-本工具支持从本地路径加载离线模型进行智能动作采样：
+替代动作**必须**通过离线模型生成。模型推理使用标准的 ALFWORLD_TEMPLATE 提示模板，该模板包含以下字段（从 D_expert 数据中提取）：
 
-```bash
-python3 -m agent_system.environments.env_package.alfworld.data_generation.D_rollout.generate_d_rollout \
-    --expert_file agent_system/environments/env_package/alfworld/data_generation/D_rollout/dexpert_test.json \
-    --k 3 \
-    --use_model \
-    --model_path /path/to/your/local/model \
-    --output_dir data/d_rollout
-```
+**提示模板字段映射：**
+
+从 D_expert 数据中的字段提取并填入 `agent_system/environments/prompts/alfworld.py` 的 `ALFWORLD_TEMPLATE`：
+
+- `task_description` ← D_expert 的 `task` 字段
+- `step_count` ← D_expert 的 `step - 1`（已采取的步骤数）
+- `history_length` ← D_expert 的 `step - 1`（全历史）
+- `action_history` ← `current_state` 的前半段（"You have taken the action 1: 'go to coffeemachine 1', action 2: 'take mug 1 from coffeemachine 1'"）
+- `current_step` ← D_expert 的 `step`
+- `current_observation` ← `current_state` 的后半段（"your current observation is: You pick up the mug 1 from the coffeemachine 1."）
+- `admissible_actions` ← 环境返回的可执行命令列表
 
 **模型要求：**
-- 模型必须保存在本地路径（离线模型）
-- 支持 Hugging Face transformers 格式
-- 包含模型权重和分词器文件
-- 自动设置 `local_files_only=True` 和 `trust_remote_code=True`
-
-**注意：** 如果不提供 `--model_path` 参数，系统将使用默认的均匀采样方法。
+- 支持 Hugging Face Transformers 格式（AutoModelForCausalLM）
+- 可以从本地路径加载（`local_files_only=True`）
+- 温度采样（默认 temperature=1.0）
+- 输出应包含在 `<action>...</action>` 标签中
 
 ## 输出文件
 

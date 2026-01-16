@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 """
-Simple validation script to check the D_rollout generation implementation.
+简单的验证脚本，用于检查 D_rollout 生成实现。
 
-This script validates:
-1. File structure and imports
-2. Data format correctness
-3. Basic logic flow
+此脚本验证：
+1. 文件结构和导入
+2. 数据格式正确性
+3. 基本逻辑流程
 
-Does NOT require full dependencies to run.
+无需完整依赖即可运行。
 """
 
 import os
@@ -18,37 +18,37 @@ from pathlib import Path
 
 
 def validate_script_exists():
-    """Check that the main script exists."""
+    """检查主脚本是否存在"""
     script_path = Path(__file__).parent / 'generate_d_rollout.py'
-    assert script_path.exists(), f"Main script not found: {script_path}"
-    print("✓ Main script exists")
+    assert script_path.exists(), f"找不到主脚本：{script_path}"
+    print("✓ 主脚本存在")
     return str(script_path)
 
 
 def validate_shell_script_exists():
-    """Check that the shell script exists."""
+    """检查 Shell 脚本是否存在"""
     script_path = Path(__file__).parent / 'run_generate_d_rollout.sh'
-    assert script_path.exists(), f"Shell script not found: {script_path}"
-    assert os.access(script_path, os.X_OK), f"Shell script not executable: {script_path}"
-    print("✓ Shell script exists and is executable")
+    assert script_path.exists(), f"找不到 Shell 脚本：{script_path}"
+    assert os.access(script_path, os.X_OK), f"Shell 脚本不可执行：{script_path}"
+    print("✓ Shell 脚本存在且可执行")
     return str(script_path)
 
 
 def validate_readme_exists():
-    """Check that README exists."""
+    """检查 README 是否存在"""
     readme_path = Path(__file__).parent / 'README_D_ROLLOUT.md'
-    assert readme_path.exists(), f"README not found: {readme_path}"
-    print("✓ README exists")
+    assert readme_path.exists(), f"找不到 README：{readme_path}"
+    print("✓ README 存在")
     return str(readme_path)
 
 
 def validate_data_format():
-    """Validate the expected D_rollout data format."""
-    # New D_expert compatible format
+    """验证预期的 D_rollout 数据格式"""
+    # 新的 D_expert 兼容格式
     expected_fields = ['task_id', 'idx', 'id', 'task', 'step', 'state_si', 
                        'expert_action_ai', 'alternative_action_j', 'next_state_sji', 'is_expert']
     
-    # Create sample entry in new format
+    # 创建新格式的示例条目
     sample_entry = {
         'task_id': 'trial_T20190908_110055_655553',
         'idx': 1,
@@ -64,49 +64,49 @@ def validate_data_format():
         'is_expert': False
     }
     
-    # Validate all expected fields exist
+    # 验证所有预期字段是否存在
     for field in expected_fields:
-        assert field in sample_entry, f"Missing required field: {field}"
+        assert field in sample_entry, f"缺少必需字段：{field}"
     
-    # Test JSON serialization
+    # 测试 JSON 序列化
     try:
         json_str = json.dumps(sample_entry, ensure_ascii=False)
         loaded = json.loads(json_str)
-        assert loaded == sample_entry, "JSON round-trip failed"
+        assert loaded == sample_entry, "JSON 往返失败"
     except Exception as e:
-        raise AssertionError(f"JSON serialization failed: {e}")
+        raise AssertionError(f"JSON 序列化失败：{e}")
     
-    print("✓ Data format validation passed")
+    print("✓ 数据格式验证通过")
     return True
 
 
 def validate_alternative_action_sampling_logic():
-    """Validate the logic for alternative action sampling."""
+    """验证替代动作采样的逻辑"""
     admissible_commands = ['action1', 'action2', 'action3', 'action4', 'action5']
     expert_action = 'action1'
     k = 3
     
-    # Simulate sampling (uniform)
+    # 模拟采样（均匀分布）
     import random
     random.seed(42)
     
     alternative_commands = [cmd for cmd in admissible_commands if cmd != expert_action]
-    assert len(alternative_commands) == 4, "Filtering failed"
+    assert len(alternative_commands) == 4, "过滤失败"
     
     sampled_actions = random.sample(alternative_commands, k=k)
-    assert len(sampled_actions) == k, "Sampling count incorrect"
-    assert expert_action not in sampled_actions, "Expert action should not be in samples"
+    assert len(sampled_actions) == k, "采样数量不正确"
+    assert expert_action not in sampled_actions, "专家动作不应在样本中"
     
-    print("✓ Alternative action sampling logic validated")
+    print("✓ 替代动作采样逻辑验证通过")
     return True
 
 
 def validate_dataset_structure():
-    """Validate that dataset can be written and read correctly."""
+    """验证数据集可以正确写入和读取"""
     with tempfile.TemporaryDirectory() as tmpdir:
         output_file = os.path.join(tmpdir, 'd_rollout.jsonl')
         
-        # Create sample data
+        # 创建示例数据
         sample_data = [
             {
                 'state_i': f'state_{i}',
@@ -118,26 +118,26 @@ def validate_dataset_structure():
             for i in range(10)
         ]
         
-        # Write data
+        # 写入数据
         with open(output_file, 'w', encoding='utf-8') as f:
             for entry in sample_data:
                 f.write(json.dumps(entry, ensure_ascii=False) + '\n')
         
-        # Read and validate
+        # 读取并验证
         loaded_data = []
         with open(output_file, 'r', encoding='utf-8') as f:
             for line in f:
                 loaded_data.append(json.loads(line))
         
-        assert len(loaded_data) == len(sample_data), "Data length mismatch"
-        assert loaded_data == sample_data, "Data content mismatch"
+        assert len(loaded_data) == len(sample_data), "数据长度不匹配"
+        assert loaded_data == sample_data, "数据内容不匹配"
         
-        print("✓ Dataset I/O validation passed")
+        print("✓ 数据集 I/O 验证通过")
         return True
 
 
 def validate_statistics_format():
-    """Validate statistics file format."""
+    """验证统计文件格式"""
     stats = {
         'num_episodes': 100,
         'successful_episodes': 85,
@@ -149,53 +149,53 @@ def validate_statistics_format():
         'use_replay': True,
     }
     
-    # Test JSON serialization
+    # 测试 JSON 序列化
     try:
         json_str = json.dumps(stats, indent=2, ensure_ascii=False)
         loaded = json.loads(json_str)
-        assert loaded == stats, "Stats round-trip failed"
+        assert loaded == stats, "统计信息往返失败"
     except Exception as e:
-        raise AssertionError(f"Stats serialization failed: {e}")
+        raise AssertionError(f"统计信息序列化失败：{e}")
     
-    print("✓ Statistics format validated")
+    print("✓ 统计格式验证通过")
     return True
 
 
 def main():
-    """Run all validation checks."""
+    """运行所有验证检查"""
     print("="*60)
-    print("D_rollout Generation Validation")
+    print("D_rollout 生成验证")
     print("="*60)
     
     try:
-        # File existence checks
+        # 文件存在性检查
         validate_script_exists()
         validate_shell_script_exists()
         validate_readme_exists()
         
-        # Format and logic checks
+        # 格式和逻辑检查
         validate_data_format()
         validate_alternative_action_sampling_logic()
         validate_dataset_structure()
         validate_statistics_format()
         
         print("="*60)
-        print("✓ All validation checks passed!")
+        print("✓ 所有验证检查通过！")
         print("="*60)
         print()
-        print("Note: This validation only checks structure and logic.")
-        print("To run the actual generation, ensure all dependencies are installed.")
-        print("See README_D_ROLLOUT.md for installation instructions.")
+        print("注意：此验证仅检查结构和逻辑。")
+        print("要运行实际生成，请确保已安装所有依赖。")
+        print("查看 README_D_ROLLOUT.md 获取安装说明。")
         return 0
         
     except AssertionError as e:
         print("="*60)
-        print(f"✗ Validation failed: {e}")
+        print(f"✗ 验证失败：{e}")
         print("="*60)
         return 1
     except Exception as e:
         print("="*60)
-        print(f"✗ Unexpected error: {e}")
+        print(f"✗ 意外错误：{e}")
         print("="*60)
         import traceback
         traceback.print_exc()

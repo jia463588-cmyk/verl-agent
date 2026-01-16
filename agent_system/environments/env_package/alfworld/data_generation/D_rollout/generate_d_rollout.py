@@ -444,7 +444,7 @@ def generate_d_rollout_from_expert_file(
                 }
                 all_d_rollout_entries.append(rollout_entry)
         
-        logging.info(f"为轨迹 {traj_num} 生成了 {len([e for e in all_d_rollout_entries if e['task_id'] == task_id])} 条 rollout 条目")
+        logging.info(f"为轨迹 {traj_idx} 生成了 {len([e for e in all_d_rollout_entries if e['task_id'] == task_id])} 条 rollout 条目")
     
     return all_d_rollout_entries
 

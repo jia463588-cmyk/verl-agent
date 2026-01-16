@@ -58,13 +58,40 @@ Where:
 
 ## Usage
 
+### Offline Model Support (New Feature)
+
+The tool now supports loading offline models from local paths for action sampling:
+
+```bash
+# Using offline model with expert data
+bash agent_system/environments/env_package/alfworld/data_generation/run_generate_d_rollout.sh \
+    dexpert_test.json 3 1.0 data/d_rollout /path/to/your/local/model
+
+# Or with Python directly
+python3 -m agent_system.environments.env_package.alfworld.data_generation.generate_d_rollout \
+    --expert_file dexpert_test.json \
+    --k 3 \
+    --use_model \
+    --model_path /path/to/your/local/model \
+    --output_dir data/d_rollout
+```
+
+**Model Requirements:**
+- Model must be saved locally (offline model)
+- Supports Hugging Face transformers format
+- Must include model weights and tokenizer files
+- Automatically sets `local_files_only=True` and `trust_remote_code=True`
+
+**Note:** If `--model_path` is not provided, the system will use uniform sampling by default.
+
 ### Mode 1: Using Pre-collected Expert Data (Recommended)
 
 If you have expert trajectory data in `dexpert_test.json`:
 
 ```bash
 cd /home/runner/work/verl-agent/verl-agent
-bash examples/data_preprocess/run_generate_d_rollout.sh dexpert_test.json 3 1.0 data/d_rollout
+bash agent_system/environments/env_package/alfworld/data_generation/run_generate_d_rollout.sh \
+    dexpert_test.json 3 1.0 data/d_rollout
 ```
 
 This will:
@@ -326,7 +353,7 @@ python3 -m examples.data_preprocess.generate_d_rollout \
 After generation, analyze the dataset to understand its characteristics:
 
 ```bash
-python3 examples/data_preprocess/analyze_d_rollout.py \
+python3 agent_system/environments/env_package/alfworld/data_generation/analyze_d_rollout.py \
     data/d_rollout/d_rollout.jsonl \
     --output data/d_rollout/analysis_report.json
 ```

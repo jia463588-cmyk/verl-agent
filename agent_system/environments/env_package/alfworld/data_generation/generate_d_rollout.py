@@ -39,7 +39,7 @@ import random
 
 # 环境和智能体导入
 import sys
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../../'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../../../../../'))
 
 from agent_system.environments.env_manager import AlfWorldEnvironmentManager
 from agent_system.environments.env_package.alfworld import alfworld_projection
@@ -47,8 +47,7 @@ from agent_system.environments.env_package.alfworld import build_alfworld_envs
 
 # 从 alfworld 包导入专家策略
 # 注意：这些需要安装 alfworld 环境包
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), 
-                                '../../agent_system/environments/env_package/alfworld'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 from alfworld.agents.expert.handcoded_expert_tw import (
     PickAndPlaceSimpleTWPolicy,
     PickTwoObjAndPlaceTWPolicy,
@@ -107,19 +106,41 @@ class AlternativeActionSampler:
         参数:
             temperature: 模型推理的采样温度
             use_model: 是否使用模型进行采样（如果为 False，使用均匀采样）
-            model_path: 模型推理的路径（可选）
+            model_path: 离线模型的本地路径（如果提供，将从本地加载模型）
         """
         self.temperature = temperature
         self.use_model = use_model
         self.model = None
+        self.tokenizer = None
+        self.model_path = model_path
         
         if use_model and model_path:
-            logging.warning(
-                "基于模型的采样尚未实现。"
-                "回退到从可执行命令的均匀采样。"
-                "要实现：加载模型/分词器并在 sample_alternative_actions() 中添加推理"
-            )
-            self.use_model = False
+            try:
+                # 尝试加载离线模型
+                logging.info(f"从本地路径加载模型: {model_path}")
+                from transformers import AutoModelForCausalLM, AutoTokenizer
+                
+                # 从本地路径加载模型和分词器
+                self.tokenizer = AutoTokenizer.from_pretrained(
+                    model_path,
+                    local_files_only=True,  # 只使用本地文件，不从网络下载
+                    trust_remote_code=True
+                )
+                self.model = AutoModelForCausalLM.from_pretrained(
+                    model_path,
+                    local_files_only=True,  # 只使用本地文件
+                    trust_remote_code=True,
+                    device_map="auto"  # 自动设备分配
+                )
+                self.model.eval()  # 设置为评估模式
+                logging.info("模型加载成功")
+                
+            except Exception as e:
+                logging.error(f"从本地路径加载模型失败: {e}")
+                logging.warning("回退到从可执行命令的均匀采样")
+                self.use_model = False
+                self.model = None
+                self.tokenizer = None
     
     def sample_alternative_actions(
         self, 
@@ -131,14 +152,73 @@ class AlternativeActionSampler:
         """
         采样 k 个不同于专家动作的替代动作。
         
-        当前实现使用从可执行命令的均匀采样。
+        如果启用了模型，将使用模型推理生成动作。
+        否则使用从可执行命令的均匀采样。
         
-        扩展为基于模型的采样：
-        1. 在初始化时设置 use_model=True 并提供 model_path
-        2. 在此处实现模型推理以生成动作
-        3. 根据 admissible_commands 验证生成的动作
-        4. 对于无效动作回退到均匀采样
+        参数:
+            current_state: 当前观察文本
+            admissible_commands: 当前状态下的有效动作列表
+            expert_action: 专家的动作（需排除）
+            k: 要采样的替代动作数量
+            
+        返回:
+            k个替代动作的列表
+        """
+        # 从可执行命令中过滤掉专家动作
+        alternative_commands = [cmd for cmd in admissible_commands if cmd != expert_action]
         
+        if len(alternative_commands) == 0:
+            logging.warning("没有可用的替代动作，专家动作是唯一选项")
+            return []
+        
+        # 如果使用模型，尝试生成动作
+        if self.use_model and self.model is not None and self.tokenizer is not None:
+            try:
+                import torch
+                sampled_actions = []
+                
+                # 构建提示
+                prompt = f"状态: {current_state}\n可用动作: {', '.join(admissible_commands)}\n请选择一个动作："
+                
+                # 生成 k 个动作
+                for _ in range(k):
+                    inputs = self.tokenizer(prompt, return_tensors="pt").to(self.model.device)
+                    
+                    with torch.no_grad():
+                        outputs = self.model.generate(
+                            **inputs,
+                            max_new_tokens=50,
+                            temperature=self.temperature,
+                            do_sample=True,
+                            pad_token_id=self.tokenizer.eos_token_id
+                        )
+                    
+                    generated_text = self.tokenizer.decode(outputs[0][inputs.input_ids.shape[1]:], skip_special_tokens=True)
+                    generated_action = generated_text.strip()
+                    
+                    # 验证生成的动作是否在可执行命令中
+                    if generated_action in alternative_commands:
+                        sampled_actions.append(generated_action)
+                    else:
+                        # 如果生成的动作无效，从替代命令中随机选择
+                        if alternative_commands:
+                            sampled_actions.append(random.choice(alternative_commands))
+                
+                if len(sampled_actions) == k:
+                    return sampled_actions
+                    
+            except Exception as e:
+                logging.warning(f"模型推理失败: {e}，回退到均匀采样")
+        
+        # 均匀采样（默认或回退方法）
+        if len(alternative_commands) < k:
+            # 替代选项不足，进行有放回采样
+            sampled_actions = random.choices(alternative_commands, k=k)
+        else:
+            # 有足够的替代选项，进行无放回采样
+            sampled_actions = random.sample(alternative_commands, k=k)
+        
+        return sampled_actions
         Args:
             current_state: Current observation text
             admissible_commands: List of valid actions in current state
@@ -633,6 +713,10 @@ def main():
                        help='Sampling temperature for alternative actions')
     parser.add_argument('--use_replay', action='store_true',
                        help='Use replay method to get actual resulting states')
+    parser.add_argument('--use_model', action='store_true',
+                       help='Use model for action sampling (default: uniform sampling)')
+    parser.add_argument('--model_path', type=str, default=None,
+                       help='Local path to offline model for action sampling')
     parser.add_argument('--log_level', type=str, default='INFO',
                        help='Logging level')
     
@@ -658,12 +742,20 @@ def main():
     os.makedirs(args.output_dir, exist_ok=True)
     
     # Build environment
-    logging.info("Building ALFWorld environment...")
-    config_path = os.path.join(os.path.dirname(__file__), '../../', args.config_path)
+    logging.info("构建 ALFWorld 环境...")
+    config_path = os.path.join(os.path.dirname(__file__), '../configs/config_tw.yaml')
+    if not os.path.exists(config_path):
+        # 如果相对路径不存在，尝试使用参数中的路径
+        config_path = args.config_path
     env_manager = build_alfworld_env(config_path, env_num=1, seed=args.seed, is_train=False)
     
-    # Initialize action sampler
-    action_sampler = AlternativeActionSampler(temperature=args.temperature, use_model=False)
+    # Initialize action sampler with model support
+    logging.info(f"初始化动作采样器: use_model={args.use_model}, model_path={args.model_path}")
+    action_sampler = AlternativeActionSampler(
+        temperature=args.temperature, 
+        use_model=args.use_model,
+        model_path=args.model_path
+    )
     
     # Generate D_rollout
     all_d_rollout_entries = []

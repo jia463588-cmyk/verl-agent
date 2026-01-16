@@ -58,13 +58,40 @@ D_rollout 数据集生成支持两种模式：
 
 ## 使用方法
 
+### 离线模型支持（新功能）
+
+本工具现在支持从本地路径加载离线模型进行动作采样：
+
+```bash
+# 使用离线模型从专家数据生成 D_rollout
+bash agent_system/environments/env_package/alfworld/data_generation/run_generate_d_rollout.sh \
+    dexpert_test.json 3 1.0 data/d_rollout /path/to/your/local/model
+
+# 或直接使用 Python
+python3 -m agent_system.environments.env_package.alfworld.data_generation.generate_d_rollout \
+    --expert_file dexpert_test.json \
+    --k 3 \
+    --use_model \
+    --model_path /path/to/your/local/model \
+    --output_dir data/d_rollout
+```
+
+**模型要求：**
+- 模型必须保存在本地路径（离线模型）
+- 支持 Hugging Face transformers 格式
+- 包含模型权重和分词器文件
+- 会自动设置 `local_files_only=True` 和 `trust_remote_code=True`
+
+**注意：** 如果不提供 `--model_path` 参数，系统将使用默认的均匀采样方法。
+
 ### 模式1：使用预收集的专家数据（推荐）
 
 如果您在 `dexpert_test.json` 中有专家轨迹数据：
 
 ```bash
 cd /home/runner/work/verl-agent/verl-agent
-bash examples/data_preprocess/run_generate_d_rollout.sh dexpert_test.json 3 1.0 data/d_rollout
+bash agent_system/environments/env_package/alfworld/data_generation/run_generate_d_rollout.sh \
+    dexpert_test.json 3 1.0 data/d_rollout
 ```
 
 这将：
@@ -79,7 +106,7 @@ bash examples/data_preprocess/run_generate_d_rollout.sh dexpert_test.json 3 1.0 
 
 ```bash
 cd /home/runner/work/verl-agent/verl-agent
-bash examples/data_preprocess/run_generate_d_rollout.sh 100 3 50 1.0 data/d_rollout
+bash agent_system/environments/env_package/alfworld/data_generation/run_generate_d_rollout.sh 100 3 50 1.0 data/d_rollout
 ```
 
 这将：
@@ -91,12 +118,12 @@ bash examples/data_preprocess/run_generate_d_rollout.sh 100 3 50 1.0 data/d_roll
 ### 自定义参数
 
 ```bash
-bash examples/data_preprocess/run_generate_d_rollout.sh NUM_EPISODES K MAX_STEPS TEMPERATURE OUTPUT_DIR
+bash agent_system/environments/env_package/alfworld/data_generation/run_generate_d_rollout.sh NUM_EPISODES K MAX_STEPS TEMPERATURE OUTPUT_DIR
 ```
 
 示例：
 ```bash
-bash examples/data_preprocess/run_generate_d_rollout.sh 200 3 50 1.0 data/my_rollout
+bash agent_system/environments/env_package/alfworld/data_generation/run_generate_d_rollout.sh 200 3 50 1.0 data/my_rollout
 ```
 
 ### 高级用法

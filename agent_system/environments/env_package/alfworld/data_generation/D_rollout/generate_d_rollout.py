@@ -425,11 +425,15 @@ def generate_d_rollout_from_expert_file(
                 # 获取结果状态
                 next_state = obs_alt['text'][env_idx]
                 
+                # 全局计数器递增
+                global_idx += 1
+                
                 # 以与 D_expert 兼容的格式创建条目
+                # idx 字段表示这是数据集中的第几条记录（全局计数）
                 rollout_entry = {
                     'task_id': task_id,
-                    'idx': traj_idx,
-                    'id': step_entry.get('id', f'traj_{traj_idx:04d}_step{step_num:03d}') + f'_alt{alt_idx + 1}',
+                    'idx': global_idx,  # 全局数据集计数，从1开始递增
+                    'id': f'rollout_{global_idx:06d}',  # 基于全局计数的唯一ID
                     'task': task_desc,
                     'step': step_num,
                     'state_si': state_si,
@@ -440,7 +444,7 @@ def generate_d_rollout_from_expert_file(
                 }
                 all_d_rollout_entries.append(rollout_entry)
         
-        logging.info(f"为轨迹 {traj_idx} 生成了 {len([e for e in all_d_rollout_entries if e['task_id'] == task_id])} 条 rollout 条目")
+        logging.info(f"为轨迹 {traj_num} 生成了 {len([e for e in all_d_rollout_entries if e['task_id'] == task_id])} 条 rollout 条目")
     
     return all_d_rollout_entries
 

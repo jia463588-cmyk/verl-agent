@@ -40,14 +40,21 @@ D_rollout 数据集生成流程：
 
 **字段说明：**
 - `task_id`: 任务/轨迹的唯一标识符
-- `idx`: 轨迹索引（轨迹编号）
-- `id`: 该条目的唯一标识符（格式：traj_XXXX_stepXXX_altX）
+- `idx`: **全局数据集计数**（表示这是数据集中的第几条记录，从1开始递增，等于数据集中的条目总数）
+- `id`: 该条目的唯一标识符（格式：rollout_XXXXXX）
 - `task`: 任务描述/目标
 - `step`: 轨迹中的步骤编号（从1开始）
 - `state_si.current_state`: 完整状态，包含动作历史和当前观察
 - `expert_action_ai`: 专家智能体选择的动作
 - `alternative_action_j`: 采样的替代动作（不同于专家动作）
 - `next_state_sji`: 执行 alternative_action_j 后的结果状态
+- `is_expert`: 布尔标志，对于 D_rollout 条目始终为 false
+
+**idx 字段说明：**
+- `idx` 是全局计数器，表示该条目在整个 D_rollout 数据集中的位置
+- 从 1 开始递增，每生成一条 rollout 条目 idx 加 1
+- 数据集最后一条记录的 `idx` 值等于数据集的总条目数
+- 示例：如果生成了 1000 条 D_rollout 数据，idx 范围为 1-1000
 - `is_expert`: 布尔标志（替代动作为 false）
 
 ## 使用方法

@@ -40,8 +40,8 @@ Output D_rollout dataset uses JSONL format compatible with D_expert:
 
 **Field descriptions:**
 - `task_id`: Unique identifier for the task/trajectory
-- `idx`: Trajectory index (episode number)
-- `id`: Unique entry ID (format: traj_XXXX_stepXXX_altX)
+- `idx`: **Global dataset counter** (represents the position of this entry in the entire D_rollout dataset, incrementing from 1)
+- `id`: Unique entry ID (format: rollout_XXXXXX)
 - `task`: Task description/goal
 - `step`: Step number in trajectory (1-indexed)
 - `state_si.current_state`: Full state with action history and current observation
@@ -49,6 +49,12 @@ Output D_rollout dataset uses JSONL format compatible with D_expert:
 - `alternative_action_j`: Sampled alternative action (different from expert action)
 - `next_state_sji`: Resulting state after executing alternative_action_j
 - `is_expert`: Boolean flag (false for alternative actions)
+
+**About the idx field:**
+- `idx` is a global counter indicating the position of this entry in the entire D_rollout dataset
+- Starts from 1 and increments by 1 for each generated rollout entry
+- The `idx` value of the last record equals the total number of entries in the dataset
+- Example: If 1000 D_rollout entries are generated, idx ranges from 1 to 1000
 
 ## Usage
 

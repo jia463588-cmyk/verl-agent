@@ -64,20 +64,21 @@
 
 ✅ **要求 1：替代动作采样**
 - 为每个状态采样 K=3 个替代动作
-- 使用 ALFWorld 可接受命令过滤
+- 从 D_expert 文件的 `admissible_actions` 字段读取可执行命令
+- 使用离线模型推理生成替代动作（基于 ALFWORLD_TEMPLATE 提示）
 - 确保替代动作与专家动作不同
-- 支持基于模型的推理（可选）或均匀采样（默认）
+- 鲁棒的动作提取支持多种标签格式
 
 ✅ **要求 2：动作筛选和执行**
 - 使用 ALFWorld 环境模板
-- 针对可接受命令验证动作
+- 针对可执行命令验证动作
 - 通过环境 step() 函数执行动作
 - 捕获状态转移 T(si, aj) → sj
 
 ✅ **要求 3：D_rollout 数据集构造**
 - 格式：D_rollout = {(si, aj, sj) | i ∈ [N], j ∈ [K]}
 - JSONL 输出，包含完整的状态-动作-状态元组
-- 包括奖励、完成标志和元数据
+- 包括 admissible_actions 和 next_admissible_actions 字段
 - 生成详细的统计文件
 
 ### 架构
@@ -85,18 +86,19 @@
 ```
 从 dexpert_test.json 加载专家轨迹
   └─ 解析预收集的专家数据
-  └─ 提取轨迹信息
+  └─ 提取轨迹信息和 admissible_actions 字段
 
 AlternativeActionSampler（替代动作采样器）
+  └─ 使用 D_expert 中的 admissible_actions 构造完整提示
+  └─ 使用离线模型推理生成替代动作
+  └─ 鲁棒的动作提取（支持多种标签格式）
   └─ 为每个状态采样 K 个替代动作
-  └─ 通过可接受命令过滤
-  └─ 可扩展支持基于模型的采样（离线模型）
 
 TrajectoryReplay（轨迹重放）
   └─ 将专家轨迹重放到每一步 i
   └─ 执行替代动作 aj
   └─ 观察产生的状态 sj
-  └─ 存储 (si, aj, sj) 元组
+  └─ 存储 (si, aj, sj) 元组及 admissible_actions
 ```
 
 ### 数据格式
@@ -106,15 +108,18 @@ D_rollout.jsonl 中的每个条目（新格式，与 D_expert 兼容）：
 {
   "task_id": "trial_T20190908_110055_655553",
   "idx": 1,
-  "id": "traj_0001_step001_alt1",
+  "id": "rollout_000001",
   "task": "put a cool mug in coffeemachine.",
   "step": 1,
   "state_si": {
     "current_state": "You have taken the action 1: 'go to coffeemachine 1', action 2: 'take mug 1 from coffeemachine 1' You are now at step 3 and your current observation is: You pick up the mug 1 from the coffeemachine 1."
   },
+  "admissible_actions": ["go to cabinet 1", "go to coffeemachine 1", "..."],
   "expert_action_ai": "go to coffeemachine 1",
   "alternative_action_j": "go to fridge 1",
-  "next_state_sji": "You arrive at fridge 1. On the fridge 1, you see a apple 1, a bowl 2, a bowl 1, a egg 1, a lettuce 1, a mug 2, a potato 2, and a potato 1.",
+  "next_state_sji": "You have taken the action 1: 'go to fridge 1' You are now at step 2 and your current observation is: You arrive at fridge 1. On the fridge 1, you see a apple 1, a bowl 2, ...",
+  "next_admissible_actions": ["examine fridge 1", "go to cabinet 1", "..."],
+  "gamefile": ["/path/to/game.tw-pddl"],
   "is_expert": false
 }
 ```

@@ -317,11 +317,7 @@ class AlternativeActionSampler:
             admissible_commands=admissible_commands
         )
         
-        # 记录完整的观察（提示）
-        logging.info("=== OBSERVATION ===")
-        logging.info(prompt)
-        
-        # 生成 k 个动作
+        # 生成 k 个动作（不显示 OBSERVATION，因为提示构造从 dexpert 直接读取字段）
         max_attempts = k * 3  # 最多尝试次数
         attempts = 0
         

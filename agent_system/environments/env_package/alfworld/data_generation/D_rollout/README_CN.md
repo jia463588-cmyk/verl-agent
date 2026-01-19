@@ -25,15 +25,18 @@ D_rollout 数据集生成流程：
 {
   "task_id": "trial_T20190908_110055_655553",
   "idx": 1,
-  "id": "traj_0001_step001_alt1",
+  "id": "rollout_000001",
   "task": "put a cool mug in coffeemachine.",
   "step": 1,
   "state_si": {
     "current_state": "You have taken the action 1: 'go to coffeemachine 1', action 2: 'take mug 1 from coffeemachine 1' You are now at step 3 and your current observation is: You pick up the mug 1 from the coffeemachine 1."
   },
+  "admissible_actions": ["go to cabinet 1", "go to coffeemachine 1", "..."],
   "expert_action_ai": "go to coffeemachine 1",
   "alternative_action_j": "go to fridge 1",
-  "next_state_sji": "You arrive at fridge 1. On the fridge 1, you see a apple 1, a bowl 2, a bowl 1, a egg 1, a lettuce 1, a mug 2, a potato 2, and a potato 1.",
+  "next_state_sji": "You have taken the action 1: 'go to fridge 1' You are now at step 2 and your current observation is: You arrive at fridge 1. On the fridge 1, you see a apple 1, a bowl 2, ...",
+  "next_admissible_actions": ["examine fridge 1", "go to cabinet 1", "..."],
+  "gamefile": ["/path/to/game.tw-pddl"],
   "is_expert": false
 }
 ```
@@ -45,9 +48,12 @@ D_rollout 数据集生成流程：
 - `task`: 任务描述/目标
 - `step`: 轨迹中的步骤编号（从1开始）
 - `state_si.current_state`: 完整状态，包含动作历史和当前观察
+- `admissible_actions`: 当前状态的可执行命令列表（从 D_expert 读取）
 - `expert_action_ai`: 专家智能体选择的动作
 - `alternative_action_j`: 采样的替代动作（不同于专家动作）
-- `next_state_sji`: 执行 alternative_action_j 后的结果状态
+- `next_state_sji`: 执行 alternative_action_j 后的结果状态（格式与 current_state 一致）
+- `next_admissible_actions`: 执行替代动作后的可执行命令列表
+- `gamefile`: 游戏文件路径
 - `is_expert`: 布尔标志，对于 D_rollout 条目始终为 false
 
 **idx 字段说明：**
@@ -127,7 +133,7 @@ python3 -m agent_system.environments.env_package.alfworld.data_generation.D_roll
 - `action_history` ← `current_state` 的前半段（"You have taken the action 1: 'go to coffeemachine 1', action 2: 'take mug 1 from coffeemachine 1'"）
 - `current_step` ← D_expert 的 `step`
 - `current_observation` ← `current_state` 的后半段（"your current observation is: You pick up the mug 1 from the coffeemachine 1."）
-- `admissible_actions` ← 环境返回的可执行命令列表
+- `admissible_actions` ← **从 D_expert 文件的 `admissible_actions` 字段直接读取**（无需环境查询）
 
 **模型要求：**
 - 支持 Hugging Face Transformers 格式（AutoModelForCausalLM）
@@ -191,10 +197,11 @@ python3 agent_system/environments/env_package/alfworld/data_generation/D_rollout
 ## 工具文件说明
 
 1. **generate_d_rollout.py**（主生成脚本）
-   - 从专家轨迹文件加载数据
-   - 使用离线模型推理采样替代动作
+   - 从专家轨迹文件加载数据（包括 admissible_actions 字段）
+   - 使用 D_expert 中的 admissible_actions 构造完整提示
+   - 使用离线模型推理采样替代动作（不依赖环境获取可执行命令）
    - 鲁棒的动作提取（支持多种标签格式）
-   - 在 ALFWorld 环境中执行动作
+   - 通过环境执行替代动作获取下一状态
    - 生成 D_rollout 数据集
    - 支持多GPU加速
 

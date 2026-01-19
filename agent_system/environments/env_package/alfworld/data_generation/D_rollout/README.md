@@ -25,15 +25,18 @@ Output D_rollout dataset uses JSONL format compatible with D_expert:
 {
   "task_id": "trial_T20190908_110055_655553",
   "idx": 1,
-  "id": "traj_0001_step001_alt1",
+  "id": "rollout_000001",
   "task": "put a cool mug in coffeemachine.",
   "step": 1,
   "state_si": {
     "current_state": "You have taken the action 1: 'go to coffeemachine 1', action 2: 'take mug 1 from coffeemachine 1' You are now at step 3 and your current observation is: You pick up the mug 1 from the coffeemachine 1."
   },
+  "admissible_actions": ["go to cabinet 1", "go to coffeemachine 1", "..."],
   "expert_action_ai": "go to coffeemachine 1",
   "alternative_action_j": "go to fridge 1",
-  "next_state_sji": "You arrive at fridge 1. On the fridge 1, you see a apple 1, a bowl 2, a bowl 1, a egg 1, a lettuce 1, a mug 2, a potato 2, and a potato 1.",
+  "next_state_sji": "You have taken the action 1: 'go to fridge 1' You are now at step 2 and your current observation is: You arrive at fridge 1. On the fridge 1, you see a apple 1, a bowl 2, ...",
+  "next_admissible_actions": ["examine fridge 1", "go to cabinet 1", "..."],
+  "gamefile": ["/path/to/game.tw-pddl"],
   "is_expert": false
 }
 ```
@@ -45,9 +48,13 @@ Output D_rollout dataset uses JSONL format compatible with D_expert:
 - `task`: Task description/goal
 - `step`: Step number in trajectory (1-indexed)
 - `state_si.current_state`: Full state with action history and current observation
+- `admissible_actions`: List of admissible commands at current state (read from D_expert)
 - `expert_action_ai`: Action chosen by expert agent
 - `alternative_action_j`: Sampled alternative action (different from expert action)
-- `next_state_sji`: Resulting state after executing alternative_action_j
+- `next_state_sji`: Resulting state after executing alternative_action_j (format matches current_state)
+- `next_admissible_actions`: List of admissible commands after executing alternative action
+- `gamefile`: Game file path
+- `is_expert`: Boolean flag (always false for rollout entries)
 - `is_expert`: Boolean flag (false for alternative actions)
 
 **About the idx field:**

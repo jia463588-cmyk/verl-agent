@@ -316,6 +316,10 @@ class AlternativeActionSampler:
             admissible_commands=admissible_commands
         )
         
+        # 记录完整的观察（提示）
+        logging.info("=== OBSERVATION ===")
+        logging.info(prompt)
+        
         # 生成 k 个动作
         max_attempts = k * 3  # 最多尝试次数
         attempts = 0
@@ -340,8 +344,9 @@ class AlternativeActionSampler:
                     skip_special_tokens=True
                 )
                 
-                # 记录模型的原始响应（截取前200字符以避免日志过长）
-                logging.debug(f"模型响应 (尝试 {attempts}): {generated_text[:200]}...")
+                # 记录完整的模型响应
+                logging.info(f"=== MODEL RESPONSE (尝试 {attempts}) ===")
+                logging.info(generated_text)
                 
                 # 从生成的文本中提取动作
                 # 尝试多种方式提取动作标签，提高鲁棒性
@@ -523,7 +528,7 @@ def generate_d_rollout_from_expert_file(
             
             # 获取当前状态下的可执行命令
             admissible_commands = info.get('admissible_commands', [])
-            logging.debug(f"  可执行命令数量: {len(admissible_commands)}, 命令: {admissible_commands[:5]}...")  # 只显示前5个
+            logging.info(f"  可执行命令数量: {len(admissible_commands)}, 命令: {admissible_commands}")
             
             # 采样替代动作（使用模型推理和 ALFWORLD_TEMPLATE）
             logging.info(f"  开始为步骤 {step_num} 采样 {k} 个替代动作...")

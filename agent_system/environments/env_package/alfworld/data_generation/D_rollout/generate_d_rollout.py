@@ -467,6 +467,7 @@ def generate_d_rollout_from_expert_file(
         D_rollout 条目列表
     """
     all_d_rollout_entries = []
+    global_idx = 0  # 初始化全局数据集计数器，从0开始（将在第一次使用时递增到1）
     
     for traj_data in expert_trajectories:
         task_id = traj_data['task_id']

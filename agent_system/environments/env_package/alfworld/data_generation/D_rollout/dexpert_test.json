@@ -1,4 +1,5 @@
-[  {
+[
+  {
     "idx": 1,
     "id": "traj_0001_step001",
     "task": "put a cool mug in coffeemachine.",
@@ -6,6 +7,31 @@
     "state_si": {
       "current_state": "-= Welcome to TextWorld, ALFRED! =-\n\nYou are in the middle of a room. Looking quickly around you, you see a cabinet 4, a cabinet 3, a cabinet 2, a cabinet 1, a coffeemachine 1, a countertop 1, a diningtable 3, a diningtable 2, a diningtable 1, a drawer 1, a fridge 1, a garbagecan 1, a microwave 1, a sidetable 1, a sinkbasin 1, a stoveburner 4, a stoveburner 3, a stoveburner 2, a stoveburner 1, and a toaster 1.\n\nYour task is to: put a cool mug in coffeemachine."
     },
+    "admissible_actions": [
+      "go to cabinet 1",
+      "go to cabinet 2",
+      "go to cabinet 3",
+      "go to cabinet 4",
+      "go to coffeemachine 1",
+      "go to countertop 1",
+      "go to diningtable 1",
+      "go to diningtable 2",
+      "go to diningtable 3",
+      "go to drawer 1",
+      "go to fridge 1",
+      "go to garbagecan 1",
+      "go to microwave 1",
+      "go to sidetable 1",
+      "go to sinkbasin 1",
+      "go to stoveburner 1",
+      "go to stoveburner 2",
+      "go to stoveburner 3",
+      "go to stoveburner 4",
+      "go to toaster 1",
+      "help",
+      "inventory",
+      "look"
+    ],
     "expert_action_ai": "go to coffeemachine 1",
     "gamefile": [
       "/user_home/liangyiwei/.cache/alfworld/json_2.1.1/train/pick_cool_then_place_in_recep-Mug-None-CoffeeMachine-21/trial_T20190908_110055_655553/game.tw-pddl"
@@ -20,6 +46,32 @@
     "state_si": {
       "current_state": "You have taken the action 1: 'go to coffeemachine 1' You are now at step 2 and your current observation is: You arrive at coffeemachine 1. On the coffeemachine 1, you see a mug 1."
     },
+    "admissible_actions": [
+      "examine coffeemachine 1",
+      "go to cabinet 1",
+      "go to cabinet 2",
+      "go to cabinet 3",
+      "go to cabinet 4",
+      "go to countertop 1",
+      "go to diningtable 1",
+      "go to diningtable 2",
+      "go to diningtable 3",
+      "go to drawer 1",
+      "go to fridge 1",
+      "go to garbagecan 1",
+      "go to microwave 1",
+      "go to sidetable 1",
+      "go to sinkbasin 1",
+      "go to stoveburner 1",
+      "go to stoveburner 2",
+      "go to stoveburner 3",
+      "go to stoveburner 4",
+      "go to toaster 1",
+      "help",
+      "inventory",
+      "look",
+      "take mug 1 from coffeemachine 1"
+    ],
     "expert_action_ai": "take mug 1 from coffeemachine 1",
     "gamefile": [
       "/user_home/liangyiwei/.cache/alfworld/json_2.1.1/train/pick_cool_then_place_in_recep-Mug-None-CoffeeMachine-21/trial_T20190908_110055_655553/game.tw-pddl"
@@ -34,6 +86,33 @@
     "state_si": {
       "current_state": "You have taken the action 1: 'go to coffeemachine 1', action 2: 'take mug 1 from coffeemachine 1' You are now at step 3 and your current observation is: You pick up the mug 1 from the coffeemachine 1."
     },
+    "admissible_actions": [
+      "examine coffeemachine 1",
+      "examine mug 1",
+      "go to cabinet 1",
+      "go to cabinet 2",
+      "go to cabinet 3",
+      "go to cabinet 4",
+      "go to countertop 1",
+      "go to diningtable 1",
+      "go to diningtable 2",
+      "go to diningtable 3",
+      "go to drawer 1",
+      "go to fridge 1",
+      "go to garbagecan 1",
+      "go to microwave 1",
+      "go to sidetable 1",
+      "go to sinkbasin 1",
+      "go to stoveburner 1",
+      "go to stoveburner 2",
+      "go to stoveburner 3",
+      "go to stoveburner 4",
+      "go to toaster 1",
+      "help",
+      "inventory",
+      "look",
+      "move mug 1 to coffeemachine 1"
+    ],
     "expert_action_ai": "go to fridge 1",
     "gamefile": [
       "/user_home/liangyiwei/.cache/alfworld/json_2.1.1/train/pick_cool_then_place_in_recep-Mug-None-CoffeeMachine-21/trial_T20190908_110055_655553/game.tw-pddl"
@@ -48,6 +127,34 @@
     "state_si": {
       "current_state": "You have taken the action 1: 'go to coffeemachine 1', action 2: 'take mug 1 from coffeemachine 1', action 3: 'go to fridge 1' You are now at step 4 and your current observation is: You arrive at fridge 1. The fridge 1 is closed."
     },
+    "admissible_actions": [
+      "cool mug 1 with fridge 1",
+      "examine fridge 1",
+      "examine mug 1",
+      "go to cabinet 1",
+      "go to cabinet 2",
+      "go to cabinet 3",
+      "go to cabinet 4",
+      "go to coffeemachine 1",
+      "go to countertop 1",
+      "go to diningtable 1",
+      "go to diningtable 2",
+      "go to diningtable 3",
+      "go to drawer 1",
+      "go to garbagecan 1",
+      "go to microwave 1",
+      "go to sidetable 1",
+      "go to sinkbasin 1",
+      "go to stoveburner 1",
+      "go to stoveburner 2",
+      "go to stoveburner 3",
+      "go to stoveburner 4",
+      "go to toaster 1",
+      "help",
+      "inventory",
+      "look",
+      "open fridge 1"
+    ],
     "expert_action_ai": "cool mug 1 with fridge 1",
     "gamefile": [
       "/user_home/liangyiwei/.cache/alfworld/json_2.1.1/train/pick_cool_then_place_in_recep-Mug-None-CoffeeMachine-21/trial_T20190908_110055_655553/game.tw-pddl"
@@ -62,6 +169,34 @@
     "state_si": {
       "current_state": "You have taken the action 1: 'go to coffeemachine 1', action 2: 'take mug 1 from coffeemachine 1', action 3: 'go to fridge 1', action 4: 'cool mug 1 with fridge 1' You are now at step 5 and your current observation is: You cool the mug 1 using the fridge 1."
     },
+    "admissible_actions": [
+      "cool mug 1 with fridge 1",
+      "examine fridge 1",
+      "examine mug 1",
+      "go to cabinet 1",
+      "go to cabinet 2",
+      "go to cabinet 3",
+      "go to cabinet 4",
+      "go to coffeemachine 1",
+      "go to countertop 1",
+      "go to diningtable 1",
+      "go to diningtable 2",
+      "go to diningtable 3",
+      "go to drawer 1",
+      "go to garbagecan 1",
+      "go to microwave 1",
+      "go to sidetable 1",
+      "go to sinkbasin 1",
+      "go to stoveburner 1",
+      "go to stoveburner 2",
+      "go to stoveburner 3",
+      "go to stoveburner 4",
+      "go to toaster 1",
+      "help",
+      "inventory",
+      "look",
+      "open fridge 1"
+    ],
     "expert_action_ai": "go to coffeemachine 1",
     "gamefile": [
       "/user_home/liangyiwei/.cache/alfworld/json_2.1.1/train/pick_cool_then_place_in_recep-Mug-None-CoffeeMachine-21/trial_T20190908_110055_655553/game.tw-pddl"
@@ -76,6 +211,33 @@
     "state_si": {
       "current_state": "You have taken the action 1: 'go to coffeemachine 1', action 2: 'take mug 1 from coffeemachine 1', action 3: 'go to fridge 1', action 4: 'cool mug 1 with fridge 1', action 5: 'go to coffeemachine 1' You are now at step 6 and your current observation is: You arrive at coffeemachine 1. On the coffeemachine 1, you see nothing."
     },
+    "admissible_actions": [
+      "examine coffeemachine 1",
+      "examine mug 1",
+      "go to cabinet 1",
+      "go to cabinet 2",
+      "go to cabinet 3",
+      "go to cabinet 4",
+      "go to countertop 1",
+      "go to diningtable 1",
+      "go to diningtable 2",
+      "go to diningtable 3",
+      "go to drawer 1",
+      "go to fridge 1",
+      "go to garbagecan 1",
+      "go to microwave 1",
+      "go to sidetable 1",
+      "go to sinkbasin 1",
+      "go to stoveburner 1",
+      "go to stoveburner 2",
+      "go to stoveburner 3",
+      "go to stoveburner 4",
+      "go to toaster 1",
+      "help",
+      "inventory",
+      "look",
+      "move mug 1 to coffeemachine 1"
+    ],
     "expert_action_ai": "move mug 1 to coffeemachine 1",
     "gamefile": [
       "/user_home/liangyiwei/.cache/alfworld/json_2.1.1/train/pick_cool_then_place_in_recep-Mug-None-CoffeeMachine-21/trial_T20190908_110055_655553/game.tw-pddl"
@@ -90,6 +252,31 @@
     "state_si": {
       "current_state": "-= Welcome to TextWorld, ALFRED! =-\n\nYou are in the middle of a room. Looking quickly around you, you see a cabinet 4, a cabinet 3, a cabinet 2, a cabinet 1, a coffeemachine 1, a countertop 1, a diningtable 3, a diningtable 2, a diningtable 1, a drawer 1, a fridge 1, a garbagecan 1, a microwave 1, a sidetable 1, a sinkbasin 1, a stoveburner 4, a stoveburner 3, a stoveburner 2, a stoveburner 1, and a toaster 1.\n\nYour task is to: put a cool mug in coffeemachine."
     },
+    "admissible_actions": [
+      "go to cabinet 1",
+      "go to cabinet 2",
+      "go to cabinet 3",
+      "go to cabinet 4",
+      "go to coffeemachine 1",
+      "go to countertop 1",
+      "go to diningtable 1",
+      "go to diningtable 2",
+      "go to diningtable 3",
+      "go to drawer 1",
+      "go to fridge 1",
+      "go to garbagecan 1",
+      "go to microwave 1",
+      "go to sidetable 1",
+      "go to sinkbasin 1",
+      "go to stoveburner 1",
+      "go to stoveburner 2",
+      "go to stoveburner 3",
+      "go to stoveburner 4",
+      "go to toaster 1",
+      "help",
+      "inventory",
+      "look"
+    ],
     "expert_action_ai": "go to microwave 1",
     "gamefile": [
       "/user_home/liangyiwei/.cache/alfworld/json_2.1.1/train/pick_cool_then_place_in_recep-Mug-None-CoffeeMachine-21/trial_T20190908_034155_073328/game.tw-pddl"
@@ -104,6 +291,32 @@
     "state_si": {
       "current_state": "You have taken the action 1: 'go to microwave 1' You are now at step 2 and your current observation is: You arrive at microwave 1. The microwave 1 is closed."
     },
+    "admissible_actions": [
+      "examine microwave 1",
+      "go to cabinet 1",
+      "go to cabinet 2",
+      "go to cabinet 3",
+      "go to cabinet 4",
+      "go to coffeemachine 1",
+      "go to countertop 1",
+      "go to diningtable 1",
+      "go to diningtable 2",
+      "go to diningtable 3",
+      "go to drawer 1",
+      "go to fridge 1",
+      "go to garbagecan 1",
+      "go to sidetable 1",
+      "go to sinkbasin 1",
+      "go to stoveburner 1",
+      "go to stoveburner 2",
+      "go to stoveburner 3",
+      "go to stoveburner 4",
+      "go to toaster 1",
+      "help",
+      "inventory",
+      "look",
+      "open microwave 1"
+    ],
     "expert_action_ai": "open microwave 1",
     "gamefile": [
       "/user_home/liangyiwei/.cache/alfworld/json_2.1.1/train/pick_cool_then_place_in_recep-Mug-None-CoffeeMachine-21/trial_T20190908_034155_073328/game.tw-pddl"
@@ -118,6 +331,34 @@
     "state_si": {
       "current_state": "You have taken the action 1: 'go to microwave 1', action 2: 'open microwave 1' You are now at step 3 and your current observation is: You open the microwave 1. The microwave 1 is open. In it, you see a egg 1, and a mug 1."
     },
+    "admissible_actions": [
+      "close microwave 1",
+      "examine microwave 1",
+      "go to cabinet 1",
+      "go to cabinet 2",
+      "go to cabinet 3",
+      "go to cabinet 4",
+      "go to coffeemachine 1",
+      "go to countertop 1",
+      "go to diningtable 1",
+      "go to diningtable 2",
+      "go to diningtable 3",
+      "go to drawer 1",
+      "go to fridge 1",
+      "go to garbagecan 1",
+      "go to sidetable 1",
+      "go to sinkbasin 1",
+      "go to stoveburner 1",
+      "go to stoveburner 2",
+      "go to stoveburner 3",
+      "go to stoveburner 4",
+      "go to toaster 1",
+      "help",
+      "inventory",
+      "look",
+      "take egg 1 from microwave 1",
+      "take mug 1 from microwave 1"
+    ],
     "expert_action_ai": "take mug 1 from microwave 1",
     "gamefile": [
       "/user_home/liangyiwei/.cache/alfworld/json_2.1.1/train/pick_cool_then_place_in_recep-Mug-None-CoffeeMachine-21/trial_T20190908_034155_073328/game.tw-pddl"
@@ -132,6 +373,35 @@
     "state_si": {
       "current_state": "You have taken the action 1: 'go to microwave 1', action 2: 'open microwave 1', action 3: 'take mug 1 from microwave 1' You are now at step 4 and your current observation is: You pick up the mug 1 from the microwave 1."
     },
+    "admissible_actions": [
+      "close microwave 1",
+      "examine microwave 1",
+      "examine mug 1",
+      "go to cabinet 1",
+      "go to cabinet 2",
+      "go to cabinet 3",
+      "go to cabinet 4",
+      "go to coffeemachine 1",
+      "go to countertop 1",
+      "go to diningtable 1",
+      "go to diningtable 2",
+      "go to diningtable 3",
+      "go to drawer 1",
+      "go to fridge 1",
+      "go to garbagecan 1",
+      "go to sidetable 1",
+      "go to sinkbasin 1",
+      "go to stoveburner 1",
+      "go to stoveburner 2",
+      "go to stoveburner 3",
+      "go to stoveburner 4",
+      "go to toaster 1",
+      "heat mug 1 with microwave 1",
+      "help",
+      "inventory",
+      "look",
+      "move mug 1 to microwave 1"
+    ],
     "expert_action_ai": "go to fridge 1",
     "gamefile": [
       "/user_home/liangyiwei/.cache/alfworld/json_2.1.1/train/pick_cool_then_place_in_recep-Mug-None-CoffeeMachine-21/trial_T20190908_034155_073328/game.tw-pddl"
@@ -146,6 +416,34 @@
     "state_si": {
       "current_state": "You have taken the action 1: 'go to microwave 1', action 2: 'open microwave 1', action 3: 'take mug 1 from microwave 1', action 4: 'go to fridge 1' You are now at step 5 and your current observation is: You arrive at fridge 1. The fridge 1 is closed."
     },
+    "admissible_actions": [
+      "cool mug 1 with fridge 1",
+      "examine fridge 1",
+      "examine mug 1",
+      "go to cabinet 1",
+      "go to cabinet 2",
+      "go to cabinet 3",
+      "go to cabinet 4",
+      "go to coffeemachine 1",
+      "go to countertop 1",
+      "go to diningtable 1",
+      "go to diningtable 2",
+      "go to diningtable 3",
+      "go to drawer 1",
+      "go to garbagecan 1",
+      "go to microwave 1",
+      "go to sidetable 1",
+      "go to sinkbasin 1",
+      "go to stoveburner 1",
+      "go to stoveburner 2",
+      "go to stoveburner 3",
+      "go to stoveburner 4",
+      "go to toaster 1",
+      "help",
+      "inventory",
+      "look",
+      "open fridge 1"
+    ],
     "expert_action_ai": "cool mug 1 with fridge 1",
     "gamefile": [
       "/user_home/liangyiwei/.cache/alfworld/json_2.1.1/train/pick_cool_then_place_in_recep-Mug-None-CoffeeMachine-21/trial_T20190908_034155_073328/game.tw-pddl"
@@ -160,6 +458,34 @@
     "state_si": {
       "current_state": "You have taken the action 1: 'go to microwave 1', action 2: 'open microwave 1', action 3: 'take mug 1 from microwave 1', action 4: 'go to fridge 1', action 5: 'cool mug 1 with fridge 1' You are now at step 6 and your current observation is: You cool the mug 1 using the fridge 1."
     },
+    "admissible_actions": [
+      "cool mug 1 with fridge 1",
+      "examine fridge 1",
+      "examine mug 1",
+      "go to cabinet 1",
+      "go to cabinet 2",
+      "go to cabinet 3",
+      "go to cabinet 4",
+      "go to coffeemachine 1",
+      "go to countertop 1",
+      "go to diningtable 1",
+      "go to diningtable 2",
+      "go to diningtable 3",
+      "go to drawer 1",
+      "go to garbagecan 1",
+      "go to microwave 1",
+      "go to sidetable 1",
+      "go to sinkbasin 1",
+      "go to stoveburner 1",
+      "go to stoveburner 2",
+      "go to stoveburner 3",
+      "go to stoveburner 4",
+      "go to toaster 1",
+      "help",
+      "inventory",
+      "look",
+      "open fridge 1"
+    ],
     "expert_action_ai": "go to coffeemachine 1",
     "gamefile": [
       "/user_home/liangyiwei/.cache/alfworld/json_2.1.1/train/pick_cool_then_place_in_recep-Mug-None-CoffeeMachine-21/trial_T20190908_034155_073328/game.tw-pddl"
@@ -174,6 +500,33 @@
     "state_si": {
       "current_state": "You have taken the action 1: 'go to microwave 1', action 2: 'open microwave 1', action 3: 'take mug 1 from microwave 1', action 4: 'go to fridge 1', action 5: 'cool mug 1 with fridge 1', action 6: 'go to coffeemachine 1' You are now at step 7 and your current observation is: You arrive at coffeemachine 1. On the coffeemachine 1, you see nothing."
     },
+    "admissible_actions": [
+      "examine coffeemachine 1",
+      "examine mug 1",
+      "go to cabinet 1",
+      "go to cabinet 2",
+      "go to cabinet 3",
+      "go to cabinet 4",
+      "go to countertop 1",
+      "go to diningtable 1",
+      "go to diningtable 2",
+      "go to diningtable 3",
+      "go to drawer 1",
+      "go to fridge 1",
+      "go to garbagecan 1",
+      "go to microwave 1",
+      "go to sidetable 1",
+      "go to sinkbasin 1",
+      "go to stoveburner 1",
+      "go to stoveburner 2",
+      "go to stoveburner 3",
+      "go to stoveburner 4",
+      "go to toaster 1",
+      "help",
+      "inventory",
+      "look",
+      "move mug 1 to coffeemachine 1"
+    ],
     "expert_action_ai": "move mug 1 to coffeemachine 1",
     "gamefile": [
       "/user_home/liangyiwei/.cache/alfworld/json_2.1.1/train/pick_cool_then_place_in_recep-Mug-None-CoffeeMachine-21/trial_T20190908_034155_073328/game.tw-pddl"
@@ -188,6 +541,31 @@
     "state_si": {
       "current_state": "-= Welcome to TextWorld, ALFRED! =-\n\nYou are in the middle of a room. Looking quickly around you, you see a cabinet 4, a cabinet 3, a cabinet 2, a cabinet 1, a coffeemachine 1, a countertop 1, a diningtable 3, a diningtable 2, a diningtable 1, a drawer 1, a fridge 1, a garbagecan 1, a microwave 1, a sidetable 1, a sinkbasin 1, a stoveburner 4, a stoveburner 3, a stoveburner 2, a stoveburner 1, and a toaster 1.\n\nYour task is to: cool some mug and put it in coffeemachine."
     },
+    "admissible_actions": [
+      "go to cabinet 1",
+      "go to cabinet 2",
+      "go to cabinet 3",
+      "go to cabinet 4",
+      "go to coffeemachine 1",
+      "go to countertop 1",
+      "go to diningtable 1",
+      "go to diningtable 2",
+      "go to diningtable 3",
+      "go to drawer 1",
+      "go to fridge 1",
+      "go to garbagecan 1",
+      "go to microwave 1",
+      "go to sidetable 1",
+      "go to sinkbasin 1",
+      "go to stoveburner 1",
+      "go to stoveburner 2",
+      "go to stoveburner 3",
+      "go to stoveburner 4",
+      "go to toaster 1",
+      "help",
+      "inventory",
+      "look"
+    ],
     "expert_action_ai": "go to diningtable 2",
     "gamefile": [
       "/user_home/liangyiwei/.cache/alfworld/json_2.1.1/train/pick_cool_then_place_in_recep-Mug-None-CoffeeMachine-21/trial_T20190908_034233_887856/game.tw-pddl"
@@ -202,6 +580,35 @@
     "state_si": {
       "current_state": "You have taken the action 1: 'go to diningtable 2' You are now at step 2 and your current observation is: You arrive at diningtable 2. On the diningtable 2, you see a cup 1, a mug 2, a plate 1, and a spatula 2."
     },
+    "admissible_actions": [
+      "examine diningtable 2",
+      "go to cabinet 1",
+      "go to cabinet 2",
+      "go to cabinet 3",
+      "go to cabinet 4",
+      "go to coffeemachine 1",
+      "go to countertop 1",
+      "go to diningtable 1",
+      "go to diningtable 3",
+      "go to drawer 1",
+      "go to fridge 1",
+      "go to garbagecan 1",
+      "go to microwave 1",
+      "go to sidetable 1",
+      "go to sinkbasin 1",
+      "go to stoveburner 1",
+      "go to stoveburner 2",
+      "go to stoveburner 3",
+      "go to stoveburner 4",
+      "go to toaster 1",
+      "help",
+      "inventory",
+      "look",
+      "take cup 1 from diningtable 2",
+      "take mug 2 from diningtable 2",
+      "take plate 1 from diningtable 2",
+      "take spatula 2 from diningtable 2"
+    ],
     "expert_action_ai": "take mug 2 from diningtable 2",
     "gamefile": [
       "/user_home/liangyiwei/.cache/alfworld/json_2.1.1/train/pick_cool_then_place_in_recep-Mug-None-CoffeeMachine-21/trial_T20190908_034233_887856/game.tw-pddl"
@@ -216,6 +623,33 @@
     "state_si": {
       "current_state": "You have taken the action 1: 'go to diningtable 2', action 2: 'take mug 2 from diningtable 2' You are now at step 3 and your current observation is: You pick up the mug 2 from the diningtable 2."
     },
+    "admissible_actions": [
+      "examine diningtable 2",
+      "examine mug 2",
+      "go to cabinet 1",
+      "go to cabinet 2",
+      "go to cabinet 3",
+      "go to cabinet 4",
+      "go to coffeemachine 1",
+      "go to countertop 1",
+      "go to diningtable 1",
+      "go to diningtable 3",
+      "go to drawer 1",
+      "go to fridge 1",
+      "go to garbagecan 1",
+      "go to microwave 1",
+      "go to sidetable 1",
+      "go to sinkbasin 1",
+      "go to stoveburner 1",
+      "go to stoveburner 2",
+      "go to stoveburner 3",
+      "go to stoveburner 4",
+      "go to toaster 1",
+      "help",
+      "inventory",
+      "look",
+      "move mug 2 to diningtable 2"
+    ],
     "expert_action_ai": "go to fridge 1",
     "gamefile": [
       "/user_home/liangyiwei/.cache/alfworld/json_2.1.1/train/pick_cool_then_place_in_recep-Mug-None-CoffeeMachine-21/trial_T20190908_034233_887856/game.tw-pddl"
@@ -230,6 +664,34 @@
     "state_si": {
       "current_state": "You have taken the action 1: 'go to diningtable 2', action 2: 'take mug 2 from diningtable 2', action 3: 'go to fridge 1' You are now at step 4 and your current observation is: You arrive at fridge 1. The fridge 1 is closed."
     },
+    "admissible_actions": [
+      "cool mug 2 with fridge 1",
+      "examine fridge 1",
+      "examine mug 2",
+      "go to cabinet 1",
+      "go to cabinet 2",
+      "go to cabinet 3",
+      "go to cabinet 4",
+      "go to coffeemachine 1",
+      "go to countertop 1",
+      "go to diningtable 1",
+      "go to diningtable 2",
+      "go to diningtable 3",
+      "go to drawer 1",
+      "go to garbagecan 1",
+      "go to microwave 1",
+      "go to sidetable 1",
+      "go to sinkbasin 1",
+      "go to stoveburner 1",
+      "go to stoveburner 2",
+      "go to stoveburner 3",
+      "go to stoveburner 4",
+      "go to toaster 1",
+      "help",
+      "inventory",
+      "look",
+      "open fridge 1"
+    ],
     "expert_action_ai": "cool mug 2 with fridge 1",
     "gamefile": [
       "/user_home/liangyiwei/.cache/alfworld/json_2.1.1/train/pick_cool_then_place_in_recep-Mug-None-CoffeeMachine-21/trial_T20190908_034233_887856/game.tw-pddl"
@@ -244,6 +706,34 @@
     "state_si": {
       "current_state": "You have taken the action 1: 'go to diningtable 2', action 2: 'take mug 2 from diningtable 2', action 3: 'go to fridge 1', action 4: 'cool mug 2 with fridge 1' You are now at step 5 and your current observation is: You cool the mug 2 using the fridge 1."
     },
+    "admissible_actions": [
+      "cool mug 2 with fridge 1",
+      "examine fridge 1",
+      "examine mug 2",
+      "go to cabinet 1",
+      "go to cabinet 2",
+      "go to cabinet 3",
+      "go to cabinet 4",
+      "go to coffeemachine 1",
+      "go to countertop 1",
+      "go to diningtable 1",
+      "go to diningtable 2",
+      "go to diningtable 3",
+      "go to drawer 1",
+      "go to garbagecan 1",
+      "go to microwave 1",
+      "go to sidetable 1",
+      "go to sinkbasin 1",
+      "go to stoveburner 1",
+      "go to stoveburner 2",
+      "go to stoveburner 3",
+      "go to stoveburner 4",
+      "go to toaster 1",
+      "help",
+      "inventory",
+      "look",
+      "open fridge 1"
+    ],
     "expert_action_ai": "go to coffeemachine 1",
     "gamefile": [
       "/user_home/liangyiwei/.cache/alfworld/json_2.1.1/train/pick_cool_then_place_in_recep-Mug-None-CoffeeMachine-21/trial_T20190908_034233_887856/game.tw-pddl"
@@ -258,6 +748,33 @@
     "state_si": {
       "current_state": "You have taken the action 1: 'go to diningtable 2', action 2: 'take mug 2 from diningtable 2', action 3: 'go to fridge 1', action 4: 'cool mug 2 with fridge 1', action 5: 'go to coffeemachine 1' You are now at step 6 and your current observation is: You arrive at coffeemachine 1. On the coffeemachine 1, you see nothing."
     },
+    "admissible_actions": [
+      "examine coffeemachine 1",
+      "examine mug 2",
+      "go to cabinet 1",
+      "go to cabinet 2",
+      "go to cabinet 3",
+      "go to cabinet 4",
+      "go to countertop 1",
+      "go to diningtable 1",
+      "go to diningtable 2",
+      "go to diningtable 3",
+      "go to drawer 1",
+      "go to fridge 1",
+      "go to garbagecan 1",
+      "go to microwave 1",
+      "go to sidetable 1",
+      "go to sinkbasin 1",
+      "go to stoveburner 1",
+      "go to stoveburner 2",
+      "go to stoveburner 3",
+      "go to stoveburner 4",
+      "go to toaster 1",
+      "help",
+      "inventory",
+      "look",
+      "move mug 2 to coffeemachine 1"
+    ],
     "expert_action_ai": "move mug 2 to coffeemachine 1",
     "gamefile": [
       "/user_home/liangyiwei/.cache/alfworld/json_2.1.1/train/pick_cool_then_place_in_recep-Mug-None-CoffeeMachine-21/trial_T20190908_034233_887856/game.tw-pddl"
@@ -272,6 +789,50 @@
     "state_si": {
       "current_state": "-= Welcome to TextWorld, ALFRED! =-\n\nYou are in the middle of a room. Looking quickly around you, you see a cabinet 20, a cabinet 19, a cabinet 18, a cabinet 17, a cabinet 16, a cabinet 15, a cabinet 14, a cabinet 13, a cabinet 12, a cabinet 11, a cabinet 10, a cabinet 9, a cabinet 8, a cabinet 7, a cabinet 6, a cabinet 5, a cabinet 4, a cabinet 3, a cabinet 2, a cabinet 1, a coffeemachine 1, a countertop 3, a countertop 2, a countertop 1, a drawer 3, a drawer 2, a drawer 1, a fridge 1, a garbagecan 1, a microwave 1, a shelf 3, a shelf 2, a shelf 1, a sinkbasin 1, a stoveburner 4, a stoveburner 3, a stoveburner 2, a stoveburner 1, and a toaster 1.\n\nYour task is to: put a cool mug in coffeemachine."
     },
+    "admissible_actions": [
+      "go to cabinet 1",
+      "go to cabinet 10",
+      "go to cabinet 11",
+      "go to cabinet 12",
+      "go to cabinet 13",
+      "go to cabinet 14",
+      "go to cabinet 15",
+      "go to cabinet 16",
+      "go to cabinet 17",
+      "go to cabinet 18",
+      "go to cabinet 19",
+      "go to cabinet 2",
+      "go to cabinet 20",
+      "go to cabinet 3",
+      "go to cabinet 4",
+      "go to cabinet 5",
+      "go to cabinet 6",
+      "go to cabinet 7",
+      "go to cabinet 8",
+      "go to cabinet 9",
+      "go to coffeemachine 1",
+      "go to countertop 1",
+      "go to countertop 2",
+      "go to countertop 3",
+      "go to drawer 1",
+      "go to drawer 2",
+      "go to drawer 3",
+      "go to fridge 1",
+      "go to garbagecan 1",
+      "go to microwave 1",
+      "go to shelf 1",
+      "go to shelf 2",
+      "go to shelf 3",
+      "go to sinkbasin 1",
+      "go to stoveburner 1",
+      "go to stoveburner 2",
+      "go to stoveburner 3",
+      "go to stoveburner 4",
+      "go to toaster 1",
+      "help",
+      "inventory",
+      "look"
+    ],
     "expert_action_ai": "go to shelf 2",
     "gamefile": [
       "/user_home/liangyiwei/.cache/alfworld/json_2.1.1/train/pick_cool_then_place_in_recep-Mug-None-CoffeeMachine-5/trial_T20190907_013225_891350/game.tw-pddl"
@@ -286,6 +847,54 @@
     "state_si": {
       "current_state": "You have taken the action 1: 'go to shelf 2' You are now at step 2 and your current observation is: You arrive at shelf 2. On the shelf 2, you see a dishsponge 2, a kettle 1, a mug 1, and a vase 1."
     },
+    "admissible_actions": [
+      "examine shelf 2",
+      "go to cabinet 1",
+      "go to cabinet 10",
+      "go to cabinet 11",
+      "go to cabinet 12",
+      "go to cabinet 13",
+      "go to cabinet 14",
+      "go to cabinet 15",
+      "go to cabinet 16",
+      "go to cabinet 17",
+      "go to cabinet 18",
+      "go to cabinet 19",
+      "go to cabinet 2",
+      "go to cabinet 20",
+      "go to cabinet 3",
+      "go to cabinet 4",
+      "go to cabinet 5",
+      "go to cabinet 6",
+      "go to cabinet 7",
+      "go to cabinet 8",
+      "go to cabinet 9",
+      "go to coffeemachine 1",
+      "go to countertop 1",
+      "go to countertop 2",
+      "go to countertop 3",
+      "go to drawer 1",
+      "go to drawer 2",
+      "go to drawer 3",
+      "go to fridge 1",
+      "go to garbagecan 1",
+      "go to microwave 1",
+      "go to shelf 1",
+      "go to shelf 3",
+      "go to sinkbasin 1",
+      "go to stoveburner 1",
+      "go to stoveburner 2",
+      "go to stoveburner 3",
+      "go to stoveburner 4",
+      "go to toaster 1",
+      "help",
+      "inventory",
+      "look",
+      "take dishsponge 2 from shelf 2",
+      "take kettle 1 from shelf 2",
+      "take mug 1 from shelf 2",
+      "take vase 1 from shelf 2"
+    ],
     "expert_action_ai": "take mug 1 from shelf 2",
     "gamefile": [
       "/user_home/liangyiwei/.cache/alfworld/json_2.1.1/train/pick_cool_then_place_in_recep-Mug-None-CoffeeMachine-5/trial_T20190907_013225_891350/game.tw-pddl"
@@ -300,6 +909,52 @@
     "state_si": {
       "current_state": "You have taken the action 1: 'go to shelf 2', action 2: 'take mug 1 from shelf 2' You are now at step 3 and your current observation is: You pick up the mug 1 from the shelf 2."
     },
+    "admissible_actions": [
+      "examine mug 1",
+      "examine shelf 2",
+      "go to cabinet 1",
+      "go to cabinet 10",
+      "go to cabinet 11",
+      "go to cabinet 12",
+      "go to cabinet 13",
+      "go to cabinet 14",
+      "go to cabinet 15",
+      "go to cabinet 16",
+      "go to cabinet 17",
+      "go to cabinet 18",
+      "go to cabinet 19",
+      "go to cabinet 2",
+      "go to cabinet 20",
+      "go to cabinet 3",
+      "go to cabinet 4",
+      "go to cabinet 5",
+      "go to cabinet 6",
+      "go to cabinet 7",
+      "go to cabinet 8",
+      "go to cabinet 9",
+      "go to coffeemachine 1",
+      "go to countertop 1",
+      "go to countertop 2",
+      "go to countertop 3",
+      "go to drawer 1",
+      "go to drawer 2",
+      "go to drawer 3",
+      "go to fridge 1",
+      "go to garbagecan 1",
+      "go to microwave 1",
+      "go to shelf 1",
+      "go to shelf 3",
+      "go to sinkbasin 1",
+      "go to stoveburner 1",
+      "go to stoveburner 2",
+      "go to stoveburner 3",
+      "go to stoveburner 4",
+      "go to toaster 1",
+      "help",
+      "inventory",
+      "look",
+      "move mug 1 to shelf 2"
+    ],
     "expert_action_ai": "go to fridge 1",
     "gamefile": [
       "/user_home/liangyiwei/.cache/alfworld/json_2.1.1/train/pick_cool_then_place_in_recep-Mug-None-CoffeeMachine-5/trial_T20190907_013225_891350/game.tw-pddl"
@@ -314,6 +969,53 @@
     "state_si": {
       "current_state": "You have taken the action 1: 'go to shelf 2', action 2: 'take mug 1 from shelf 2', action 3: 'go to fridge 1' You are now at step 4 and your current observation is: You arrive at fridge 1. The fridge 1 is closed."
     },
+    "admissible_actions": [
+      "cool mug 1 with fridge 1",
+      "examine fridge 1",
+      "examine mug 1",
+      "go to cabinet 1",
+      "go to cabinet 10",
+      "go to cabinet 11",
+      "go to cabinet 12",
+      "go to cabinet 13",
+      "go to cabinet 14",
+      "go to cabinet 15",
+      "go to cabinet 16",
+      "go to cabinet 17",
+      "go to cabinet 18",
+      "go to cabinet 19",
+      "go to cabinet 2",
+      "go to cabinet 20",
+      "go to cabinet 3",
+      "go to cabinet 4",
+      "go to cabinet 5",
+      "go to cabinet 6",
+      "go to cabinet 7",
+      "go to cabinet 8",
+      "go to cabinet 9",
+      "go to coffeemachine 1",
+      "go to countertop 1",
+      "go to countertop 2",
+      "go to countertop 3",
+      "go to drawer 1",
+      "go to drawer 2",
+      "go to drawer 3",
+      "go to garbagecan 1",
+      "go to microwave 1",
+      "go to shelf 1",
+      "go to shelf 2",
+      "go to shelf 3",
+      "go to sinkbasin 1",
+      "go to stoveburner 1",
+      "go to stoveburner 2",
+      "go to stoveburner 3",
+      "go to stoveburner 4",
+      "go to toaster 1",
+      "help",
+      "inventory",
+      "look",
+      "open fridge 1"
+    ],
     "expert_action_ai": "cool mug 1 with fridge 1",
     "gamefile": [
       "/user_home/liangyiwei/.cache/alfworld/json_2.1.1/train/pick_cool_then_place_in_recep-Mug-None-CoffeeMachine-5/trial_T20190907_013225_891350/game.tw-pddl"
@@ -328,6 +1030,53 @@
     "state_si": {
       "current_state": "You have taken the action 1: 'go to shelf 2', action 2: 'take mug 1 from shelf 2', action 3: 'go to fridge 1', action 4: 'cool mug 1 with fridge 1' You are now at step 5 and your current observation is: You cool the mug 1 using the fridge 1."
     },
+    "admissible_actions": [
+      "cool mug 1 with fridge 1",
+      "examine fridge 1",
+      "examine mug 1",
+      "go to cabinet 1",
+      "go to cabinet 10",
+      "go to cabinet 11",
+      "go to cabinet 12",
+      "go to cabinet 13",
+      "go to cabinet 14",
+      "go to cabinet 15",
+      "go to cabinet 16",
+      "go to cabinet 17",
+      "go to cabinet 18",
+      "go to cabinet 19",
+      "go to cabinet 2",
+      "go to cabinet 20",
+      "go to cabinet 3",
+      "go to cabinet 4",
+      "go to cabinet 5",
+      "go to cabinet 6",
+      "go to cabinet 7",
+      "go to cabinet 8",
+      "go to cabinet 9",
+      "go to coffeemachine 1",
+      "go to countertop 1",
+      "go to countertop 2",
+      "go to countertop 3",
+      "go to drawer 1",
+      "go to drawer 2",
+      "go to drawer 3",
+      "go to garbagecan 1",
+      "go to microwave 1",
+      "go to shelf 1",
+      "go to shelf 2",
+      "go to shelf 3",
+      "go to sinkbasin 1",
+      "go to stoveburner 1",
+      "go to stoveburner 2",
+      "go to stoveburner 3",
+      "go to stoveburner 4",
+      "go to toaster 1",
+      "help",
+      "inventory",
+      "look",
+      "open fridge 1"
+    ],
     "expert_action_ai": "go to coffeemachine 1",
     "gamefile": [
       "/user_home/liangyiwei/.cache/alfworld/json_2.1.1/train/pick_cool_then_place_in_recep-Mug-None-CoffeeMachine-5/trial_T20190907_013225_891350/game.tw-pddl"
@@ -342,6 +1091,52 @@
     "state_si": {
       "current_state": "You have taken the action 1: 'go to shelf 2', action 2: 'take mug 1 from shelf 2', action 3: 'go to fridge 1', action 4: 'cool mug 1 with fridge 1', action 5: 'go to coffeemachine 1' You are now at step 6 and your current observation is: You arrive at coffeemachine 1. On the coffeemachine 1, you see nothing."
     },
+    "admissible_actions": [
+      "examine coffeemachine 1",
+      "examine mug 1",
+      "go to cabinet 1",
+      "go to cabinet 10",
+      "go to cabinet 11",
+      "go to cabinet 12",
+      "go to cabinet 13",
+      "go to cabinet 14",
+      "go to cabinet 15",
+      "go to cabinet 16",
+      "go to cabinet 17",
+      "go to cabinet 18",
+      "go to cabinet 19",
+      "go to cabinet 2",
+      "go to cabinet 20",
+      "go to cabinet 3",
+      "go to cabinet 4",
+      "go to cabinet 5",
+      "go to cabinet 6",
+      "go to cabinet 7",
+      "go to cabinet 8",
+      "go to cabinet 9",
+      "go to countertop 1",
+      "go to countertop 2",
+      "go to countertop 3",
+      "go to drawer 1",
+      "go to drawer 2",
+      "go to drawer 3",
+      "go to fridge 1",
+      "go to garbagecan 1",
+      "go to microwave 1",
+      "go to shelf 1",
+      "go to shelf 2",
+      "go to shelf 3",
+      "go to sinkbasin 1",
+      "go to stoveburner 1",
+      "go to stoveburner 2",
+      "go to stoveburner 3",
+      "go to stoveburner 4",
+      "go to toaster 1",
+      "help",
+      "inventory",
+      "look",
+      "move mug 1 to coffeemachine 1"
+    ],
     "expert_action_ai": "move mug 1 to coffeemachine 1",
     "gamefile": [
       "/user_home/liangyiwei/.cache/alfworld/json_2.1.1/train/pick_cool_then_place_in_recep-Mug-None-CoffeeMachine-5/trial_T20190907_013225_891350/game.tw-pddl"
@@ -356,6 +1151,50 @@
     "state_si": {
       "current_state": "-= Welcome to TextWorld, ALFRED! =-\n\nYou are in the middle of a room. Looking quickly around you, you see a cabinet 20, a cabinet 19, a cabinet 18, a cabinet 17, a cabinet 16, a cabinet 15, a cabinet 14, a cabinet 13, a cabinet 12, a cabinet 11, a cabinet 10, a cabinet 9, a cabinet 8, a cabinet 7, a cabinet 6, a cabinet 5, a cabinet 4, a cabinet 3, a cabinet 2, a cabinet 1, a coffeemachine 1, a countertop 3, a countertop 2, a countertop 1, a drawer 3, a drawer 2, a drawer 1, a fridge 1, a garbagecan 1, a microwave 1, a shelf 3, a shelf 2, a shelf 1, a sinkbasin 1, a stoveburner 4, a stoveburner 3, a stoveburner 2, a stoveburner 1, and a toaster 1.\n\nYour task is to: cool some mug and put it in coffeemachine."
     },
+    "admissible_actions": [
+      "go to cabinet 1",
+      "go to cabinet 10",
+      "go to cabinet 11",
+      "go to cabinet 12",
+      "go to cabinet 13",
+      "go to cabinet 14",
+      "go to cabinet 15",
+      "go to cabinet 16",
+      "go to cabinet 17",
+      "go to cabinet 18",
+      "go to cabinet 19",
+      "go to cabinet 2",
+      "go to cabinet 20",
+      "go to cabinet 3",
+      "go to cabinet 4",
+      "go to cabinet 5",
+      "go to cabinet 6",
+      "go to cabinet 7",
+      "go to cabinet 8",
+      "go to cabinet 9",
+      "go to coffeemachine 1",
+      "go to countertop 1",
+      "go to countertop 2",
+      "go to countertop 3",
+      "go to drawer 1",
+      "go to drawer 2",
+      "go to drawer 3",
+      "go to fridge 1",
+      "go to garbagecan 1",
+      "go to microwave 1",
+      "go to shelf 1",
+      "go to shelf 2",
+      "go to shelf 3",
+      "go to sinkbasin 1",
+      "go to stoveburner 1",
+      "go to stoveburner 2",
+      "go to stoveburner 3",
+      "go to stoveburner 4",
+      "go to toaster 1",
+      "help",
+      "inventory",
+      "look"
+    ],
     "expert_action_ai": "go to countertop 3",
     "gamefile": [
       "/user_home/liangyiwei/.cache/alfworld/json_2.1.1/train/pick_cool_then_place_in_recep-Mug-None-CoffeeMachine-5/trial_T20190908_170305_166722/game.tw-pddl"
@@ -370,6 +1209,55 @@
     "state_si": {
       "current_state": "You have taken the action 1: 'go to countertop 3' You are now at step 2 and your current observation is: You arrive at countertop 3. On the countertop 3, you see a butterknife 1, a houseplant 1, a lettuce 3, a mug 1, a soapbottle 2, and a statue 1."
     },
+    "admissible_actions": [
+      "examine countertop 3",
+      "go to cabinet 1",
+      "go to cabinet 10",
+      "go to cabinet 11",
+      "go to cabinet 12",
+      "go to cabinet 13",
+      "go to cabinet 14",
+      "go to cabinet 15",
+      "go to cabinet 16",
+      "go to cabinet 17",
+      "go to cabinet 18",
+      "go to cabinet 19",
+      "go to cabinet 2",
+      "go to cabinet 20",
+      "go to cabinet 3",
+      "go to cabinet 4",
+      "go to cabinet 5",
+      "go to cabinet 6",
+      "go to cabinet 7",
+      "go to cabinet 8",
+      "go to cabinet 9",
+      "go to coffeemachine 1",
+      "go to countertop 1",
+      "go to countertop 2",
+      "go to drawer 1",
+      "go to drawer 2",
+      "go to drawer 3",
+      "go to fridge 1",
+      "go to garbagecan 1",
+      "go to microwave 1",
+      "go to shelf 1",
+      "go to shelf 2",
+      "go to shelf 3",
+      "go to sinkbasin 1",
+      "go to stoveburner 1",
+      "go to stoveburner 2",
+      "go to stoveburner 3",
+      "go to stoveburner 4",
+      "go to toaster 1",
+      "help",
+      "inventory",
+      "look",
+      "take butterknife 1 from countertop 3",
+      "take lettuce 3 from countertop 3",
+      "take mug 1 from countertop 3",
+      "take soapbottle 2 from countertop 3",
+      "take statue 1 from countertop 3"
+    ],
     "expert_action_ai": "take mug 1 from countertop 3",
     "gamefile": [
       "/user_home/liangyiwei/.cache/alfworld/json_2.1.1/train/pick_cool_then_place_in_recep-Mug-None-CoffeeMachine-5/trial_T20190908_170305_166722/game.tw-pddl"
@@ -384,6 +1272,52 @@
     "state_si": {
       "current_state": "You have taken the action 1: 'go to countertop 3', action 2: 'take mug 1 from countertop 3' You are now at step 3 and your current observation is: You pick up the mug 1 from the countertop 3."
     },
+    "admissible_actions": [
+      "examine countertop 3",
+      "examine mug 1",
+      "go to cabinet 1",
+      "go to cabinet 10",
+      "go to cabinet 11",
+      "go to cabinet 12",
+      "go to cabinet 13",
+      "go to cabinet 14",
+      "go to cabinet 15",
+      "go to cabinet 16",
+      "go to cabinet 17",
+      "go to cabinet 18",
+      "go to cabinet 19",
+      "go to cabinet 2",
+      "go to cabinet 20",
+      "go to cabinet 3",
+      "go to cabinet 4",
+      "go to cabinet 5",
+      "go to cabinet 6",
+      "go to cabinet 7",
+      "go to cabinet 8",
+      "go to cabinet 9",
+      "go to coffeemachine 1",
+      "go to countertop 1",
+      "go to countertop 2",
+      "go to drawer 1",
+      "go to drawer 2",
+      "go to drawer 3",
+      "go to fridge 1",
+      "go to garbagecan 1",
+      "go to microwave 1",
+      "go to shelf 1",
+      "go to shelf 2",
+      "go to shelf 3",
+      "go to sinkbasin 1",
+      "go to stoveburner 1",
+      "go to stoveburner 2",
+      "go to stoveburner 3",
+      "go to stoveburner 4",
+      "go to toaster 1",
+      "help",
+      "inventory",
+      "look",
+      "move mug 1 to countertop 3"
+    ],
     "expert_action_ai": "go to fridge 1",
     "gamefile": [
       "/user_home/liangyiwei/.cache/alfworld/json_2.1.1/train/pick_cool_then_place_in_recep-Mug-None-CoffeeMachine-5/trial_T20190908_170305_166722/game.tw-pddl"
@@ -398,6 +1332,53 @@
     "state_si": {
       "current_state": "You have taken the action 1: 'go to countertop 3', action 2: 'take mug 1 from countertop 3', action 3: 'go to fridge 1' You are now at step 4 and your current observation is: You arrive at fridge 1. The fridge 1 is closed."
     },
+    "admissible_actions": [
+      "cool mug 1 with fridge 1",
+      "examine fridge 1",
+      "examine mug 1",
+      "go to cabinet 1",
+      "go to cabinet 10",
+      "go to cabinet 11",
+      "go to cabinet 12",
+      "go to cabinet 13",
+      "go to cabinet 14",
+      "go to cabinet 15",
+      "go to cabinet 16",
+      "go to cabinet 17",
+      "go to cabinet 18",
+      "go to cabinet 19",
+      "go to cabinet 2",
+      "go to cabinet 20",
+      "go to cabinet 3",
+      "go to cabinet 4",
+      "go to cabinet 5",
+      "go to cabinet 6",
+      "go to cabinet 7",
+      "go to cabinet 8",
+      "go to cabinet 9",
+      "go to coffeemachine 1",
+      "go to countertop 1",
+      "go to countertop 2",
+      "go to countertop 3",
+      "go to drawer 1",
+      "go to drawer 2",
+      "go to drawer 3",
+      "go to garbagecan 1",
+      "go to microwave 1",
+      "go to shelf 1",
+      "go to shelf 2",
+      "go to shelf 3",
+      "go to sinkbasin 1",
+      "go to stoveburner 1",
+      "go to stoveburner 2",
+      "go to stoveburner 3",
+      "go to stoveburner 4",
+      "go to toaster 1",
+      "help",
+      "inventory",
+      "look",
+      "open fridge 1"
+    ],
     "expert_action_ai": "cool mug 1 with fridge 1",
     "gamefile": [
       "/user_home/liangyiwei/.cache/alfworld/json_2.1.1/train/pick_cool_then_place_in_recep-Mug-None-CoffeeMachine-5/trial_T20190908_170305_166722/game.tw-pddl"
@@ -412,6 +1393,53 @@
     "state_si": {
       "current_state": "You have taken the action 1: 'go to countertop 3', action 2: 'take mug 1 from countertop 3', action 3: 'go to fridge 1', action 4: 'cool mug 1 with fridge 1' You are now at step 5 and your current observation is: You cool the mug 1 using the fridge 1."
     },
+    "admissible_actions": [
+      "cool mug 1 with fridge 1",
+      "examine fridge 1",
+      "examine mug 1",
+      "go to cabinet 1",
+      "go to cabinet 10",
+      "go to cabinet 11",
+      "go to cabinet 12",
+      "go to cabinet 13",
+      "go to cabinet 14",
+      "go to cabinet 15",
+      "go to cabinet 16",
+      "go to cabinet 17",
+      "go to cabinet 18",
+      "go to cabinet 19",
+      "go to cabinet 2",
+      "go to cabinet 20",
+      "go to cabinet 3",
+      "go to cabinet 4",
+      "go to cabinet 5",
+      "go to cabinet 6",
+      "go to cabinet 7",
+      "go to cabinet 8",
+      "go to cabinet 9",
+      "go to coffeemachine 1",
+      "go to countertop 1",
+      "go to countertop 2",
+      "go to countertop 3",
+      "go to drawer 1",
+      "go to drawer 2",
+      "go to drawer 3",
+      "go to garbagecan 1",
+      "go to microwave 1",
+      "go to shelf 1",
+      "go to shelf 2",
+      "go to shelf 3",
+      "go to sinkbasin 1",
+      "go to stoveburner 1",
+      "go to stoveburner 2",
+      "go to stoveburner 3",
+      "go to stoveburner 4",
+      "go to toaster 1",
+      "help",
+      "inventory",
+      "look",
+      "open fridge 1"
+    ],
     "expert_action_ai": "go to coffeemachine 1",
     "gamefile": [
       "/user_home/liangyiwei/.cache/alfworld/json_2.1.1/train/pick_cool_then_place_in_recep-Mug-None-CoffeeMachine-5/trial_T20190908_170305_166722/game.tw-pddl"
@@ -426,457 +1454,56 @@
     "state_si": {
       "current_state": "You have taken the action 1: 'go to countertop 3', action 2: 'take mug 1 from countertop 3', action 3: 'go to fridge 1', action 4: 'cool mug 1 with fridge 1', action 5: 'go to coffeemachine 1' You are now at step 6 and your current observation is: You arrive at coffeemachine 1. On the coffeemachine 1, you see nothing."
     },
+    "admissible_actions": [
+      "examine coffeemachine 1",
+      "examine mug 1",
+      "go to cabinet 1",
+      "go to cabinet 10",
+      "go to cabinet 11",
+      "go to cabinet 12",
+      "go to cabinet 13",
+      "go to cabinet 14",
+      "go to cabinet 15",
+      "go to cabinet 16",
+      "go to cabinet 17",
+      "go to cabinet 18",
+      "go to cabinet 19",
+      "go to cabinet 2",
+      "go to cabinet 20",
+      "go to cabinet 3",
+      "go to cabinet 4",
+      "go to cabinet 5",
+      "go to cabinet 6",
+      "go to cabinet 7",
+      "go to cabinet 8",
+      "go to cabinet 9",
+      "go to countertop 1",
+      "go to countertop 2",
+      "go to countertop 3",
+      "go to drawer 1",
+      "go to drawer 2",
+      "go to drawer 3",
+      "go to fridge 1",
+      "go to garbagecan 1",
+      "go to microwave 1",
+      "go to shelf 1",
+      "go to shelf 2",
+      "go to shelf 3",
+      "go to sinkbasin 1",
+      "go to stoveburner 1",
+      "go to stoveburner 2",
+      "go to stoveburner 3",
+      "go to stoveburner 4",
+      "go to toaster 1",
+      "help",
+      "inventory",
+      "look",
+      "move mug 1 to coffeemachine 1"
+    ],
     "expert_action_ai": "move mug 1 to coffeemachine 1",
     "gamefile": [
       "/user_home/liangyiwei/.cache/alfworld/json_2.1.1/train/pick_cool_then_place_in_recep-Mug-None-CoffeeMachine-5/trial_T20190908_170305_166722/game.tw-pddl"
     ],
     "task_id": "trial_T20190908_170305_166722"
-  },
-  {
-    "idx": 32,
-    "id": "traj_0006_step001",
-    "task": "put a clean tomato in garbagecan.",
-    "step": 1,
-    "state_si": {
-      "current_state": "-= Welcome to TextWorld, ALFRED! =-\n\nYou are in the middle of a room. Looking quickly around you, you see a cabinet 11, a cabinet 10, a cabinet 9, a cabinet 8, a cabinet 7, a cabinet 6, a cabinet 5, a cabinet 4, a cabinet 3, a cabinet 2, a cabinet 1, a coffeemachine 1, a countertop 2, a countertop 1, a diningtable 1, a drawer 3, a drawer 2, a drawer 1, a fridge 1, a garbagecan 1, a microwave 1, a sinkbasin 1, a stoveburner 4, a stoveburner 3, a stoveburner 2, a stoveburner 1, and a toaster 1.\n\nYour task is to: put a clean tomato in garbagecan."
-    },
-    "expert_action_ai": "go to fridge 1",
-    "gamefile": [
-      "/user_home/liangyiwei/.cache/alfworld/json_2.1.1/train/pick_clean_then_place_in_recep-Tomato-None-GarbageCan-15/trial_T20190908_185947_633737/game.tw-pddl"
-    ],
-    "task_id": "trial_T20190908_185947_633737"
-  },
-  {
-    "idx": 33,
-    "id": "traj_0006_step002",
-    "task": "put a clean tomato in garbagecan.",
-    "step": 2,
-    "state_si": {
-      "current_state": "You have taken the action 1: 'go to fridge 1' You are now at step 2 and your current observation is: You arrive at fridge 1. The fridge 1 is closed."
-    },
-    "expert_action_ai": "open fridge 1",
-    "gamefile": [
-      "/user_home/liangyiwei/.cache/alfworld/json_2.1.1/train/pick_clean_then_place_in_recep-Tomato-None-GarbageCan-15/trial_T20190908_185947_633737/game.tw-pddl"
-    ],
-    "task_id": "trial_T20190908_185947_633737"
-  },
-  {
-    "idx": 34,
-    "id": "traj_0006_step003",
-    "task": "put a clean tomato in garbagecan.",
-    "step": 3,
-    "state_si": {
-      "current_state": "You have taken the action 1: 'go to fridge 1', action 2: 'open fridge 1' You are now at step 3 and your current observation is: You open the fridge 1. The fridge 1 is open. In it, you see a apple 2, a cup 3, a cup 2, and a tomato 1."
-    },
-    "expert_action_ai": "take tomato 1 from fridge 1",
-    "gamefile": [
-      "/user_home/liangyiwei/.cache/alfworld/json_2.1.1/train/pick_clean_then_place_in_recep-Tomato-None-GarbageCan-15/trial_T20190908_185947_633737/game.tw-pddl"
-    ],
-    "task_id": "trial_T20190908_185947_633737"
-  },
-  {
-    "idx": 35,
-    "id": "traj_0006_step004",
-    "task": "put a clean tomato in garbagecan.",
-    "step": 4,
-    "state_si": {
-      "current_state": "You have taken the action 1: 'go to fridge 1', action 2: 'open fridge 1', action 3: 'take tomato 1 from fridge 1' You are now at step 4 and your current observation is: You pick up the tomato 1 from the fridge 1."
-    },
-    "expert_action_ai": "go to sinkbasin 1",
-    "gamefile": [
-      "/user_home/liangyiwei/.cache/alfworld/json_2.1.1/train/pick_clean_then_place_in_recep-Tomato-None-GarbageCan-15/trial_T20190908_185947_633737/game.tw-pddl"
-    ],
-    "task_id": "trial_T20190908_185947_633737"
-  },
-  {
-    "idx": 36,
-    "id": "traj_0006_step005",
-    "task": "put a clean tomato in garbagecan.",
-    "step": 5,
-    "state_si": {
-      "current_state": "You have taken the action 1: 'go to fridge 1', action 2: 'open fridge 1', action 3: 'take tomato 1 from fridge 1', action 4: 'go to sinkbasin 1' You are now at step 5 and your current observation is: You arrive at sinkbasin 1. On the sinkbasin 1, you see nothing."
-    },
-    "expert_action_ai": "clean tomato 1 with sinkbasin 1",
-    "gamefile": [
-      "/user_home/liangyiwei/.cache/alfworld/json_2.1.1/train/pick_clean_then_place_in_recep-Tomato-None-GarbageCan-15/trial_T20190908_185947_633737/game.tw-pddl"
-    ],
-    "task_id": "trial_T20190908_185947_633737"
-  },
-  {
-    "idx": 37,
-    "id": "traj_0006_step006",
-    "task": "put a clean tomato in garbagecan.",
-    "step": 6,
-    "state_si": {
-      "current_state": "You have taken the action 1: 'go to fridge 1', action 2: 'open fridge 1', action 3: 'take tomato 1 from fridge 1', action 4: 'go to sinkbasin 1', action 5: 'clean tomato 1 with sinkbasin 1' You are now at step 6 and your current observation is: You clean the tomato 1 using the sinkbasin 1."
-    },
-    "expert_action_ai": "go to garbagecan 1",
-    "gamefile": [
-      "/user_home/liangyiwei/.cache/alfworld/json_2.1.1/train/pick_clean_then_place_in_recep-Tomato-None-GarbageCan-15/trial_T20190908_185947_633737/game.tw-pddl"
-    ],
-    "task_id": "trial_T20190908_185947_633737"
-  },
-  {
-    "idx": 38,
-    "id": "traj_0006_step007",
-    "task": "put a clean tomato in garbagecan.",
-    "step": 7,
-    "state_si": {
-      "current_state": "You have taken the action 1: 'go to fridge 1', action 2: 'open fridge 1', action 3: 'take tomato 1 from fridge 1', action 4: 'go to sinkbasin 1', action 5: 'clean tomato 1 with sinkbasin 1', action 6: 'go to garbagecan 1' You are now at step 7 and your current observation is: You arrive at garbagecan 1. On the garbagecan 1, you see nothing."
-    },
-    "expert_action_ai": "move tomato 1 to garbagecan 1",
-    "gamefile": [
-      "/user_home/liangyiwei/.cache/alfworld/json_2.1.1/train/pick_clean_then_place_in_recep-Tomato-None-GarbageCan-15/trial_T20190908_185947_633737/game.tw-pddl"
-    ],
-    "task_id": "trial_T20190908_185947_633737"
-  },
-  {
-    "idx": 39,
-    "id": "traj_0007_step001",
-    "task": "clean some tomato and put it in garbagecan.",
-    "step": 1,
-    "state_si": {
-      "current_state": "-= Welcome to TextWorld, ALFRED! =-\n\nYou are in the middle of a room. Looking quickly around you, you see a cabinet 11, a cabinet 10, a cabinet 9, a cabinet 8, a cabinet 7, a cabinet 6, a cabinet 5, a cabinet 4, a cabinet 3, a cabinet 2, a cabinet 1, a coffeemachine 1, a countertop 2, a countertop 1, a diningtable 1, a drawer 3, a drawer 2, a drawer 1, a fridge 1, a garbagecan 1, a microwave 1, a sinkbasin 1, a stoveburner 4, a stoveburner 3, a stoveburner 2, a stoveburner 1, and a toaster 1.\n\nYour task is to: clean some tomato and put it in garbagecan."
-    },
-    "expert_action_ai": "go to fridge 1",
-    "gamefile": [
-      "/user_home/liangyiwei/.cache/alfworld/json_2.1.1/train/pick_clean_then_place_in_recep-Tomato-None-GarbageCan-15/trial_T20190908_190029_853407/game.tw-pddl"
-    ],
-    "task_id": "trial_T20190908_190029_853407"
-  },
-  {
-    "idx": 40,
-    "id": "traj_0007_step002",
-    "task": "clean some tomato and put it in garbagecan.",
-    "step": 2,
-    "state_si": {
-      "current_state": "You have taken the action 1: 'go to fridge 1' You are now at step 2 and your current observation is: You arrive at fridge 1. The fridge 1 is closed."
-    },
-    "expert_action_ai": "open fridge 1",
-    "gamefile": [
-      "/user_home/liangyiwei/.cache/alfworld/json_2.1.1/train/pick_clean_then_place_in_recep-Tomato-None-GarbageCan-15/trial_T20190908_190029_853407/game.tw-pddl"
-    ],
-    "task_id": "trial_T20190908_190029_853407"
-  },
-  {
-    "idx": 41,
-    "id": "traj_0007_step003",
-    "task": "clean some tomato and put it in garbagecan.",
-    "step": 3,
-    "state_si": {
-      "current_state": "You have taken the action 1: 'go to fridge 1', action 2: 'open fridge 1' You are now at step 3 and your current observation is: You open the fridge 1. The fridge 1 is open. In it, you see a bread 2, a cup 2, a cup 1, and a tomato 1."
-    },
-    "expert_action_ai": "take tomato 1 from fridge 1",
-    "gamefile": [
-      "/user_home/liangyiwei/.cache/alfworld/json_2.1.1/train/pick_clean_then_place_in_recep-Tomato-None-GarbageCan-15/trial_T20190908_190029_853407/game.tw-pddl"
-    ],
-    "task_id": "trial_T20190908_190029_853407"
-  },
-  {
-    "idx": 42,
-    "id": "traj_0007_step004",
-    "task": "clean some tomato and put it in garbagecan.",
-    "step": 4,
-    "state_si": {
-      "current_state": "You have taken the action 1: 'go to fridge 1', action 2: 'open fridge 1', action 3: 'take tomato 1 from fridge 1' You are now at step 4 and your current observation is: You pick up the tomato 1 from the fridge 1."
-    },
-    "expert_action_ai": "go to sinkbasin 1",
-    "gamefile": [
-      "/user_home/liangyiwei/.cache/alfworld/json_2.1.1/train/pick_clean_then_place_in_recep-Tomato-None-GarbageCan-15/trial_T20190908_190029_853407/game.tw-pddl"
-    ],
-    "task_id": "trial_T20190908_190029_853407"
-  },
-  {
-    "idx": 43,
-    "id": "traj_0007_step005",
-    "task": "clean some tomato and put it in garbagecan.",
-    "step": 5,
-    "state_si": {
-      "current_state": "You have taken the action 1: 'go to fridge 1', action 2: 'open fridge 1', action 3: 'take tomato 1 from fridge 1', action 4: 'go to sinkbasin 1' You are now at step 5 and your current observation is: You arrive at sinkbasin 1. On the sinkbasin 1, you see nothing."
-    },
-    "expert_action_ai": "clean tomato 1 with sinkbasin 1",
-    "gamefile": [
-      "/user_home/liangyiwei/.cache/alfworld/json_2.1.1/train/pick_clean_then_place_in_recep-Tomato-None-GarbageCan-15/trial_T20190908_190029_853407/game.tw-pddl"
-    ],
-    "task_id": "trial_T20190908_190029_853407"
-  },
-  {
-    "idx": 44,
-    "id": "traj_0007_step006",
-    "task": "clean some tomato and put it in garbagecan.",
-    "step": 6,
-    "state_si": {
-      "current_state": "You have taken the action 1: 'go to fridge 1', action 2: 'open fridge 1', action 3: 'take tomato 1 from fridge 1', action 4: 'go to sinkbasin 1', action 5: 'clean tomato 1 with sinkbasin 1' You are now at step 6 and your current observation is: You clean the tomato 1 using the sinkbasin 1."
-    },
-    "expert_action_ai": "go to garbagecan 1",
-    "gamefile": [
-      "/user_home/liangyiwei/.cache/alfworld/json_2.1.1/train/pick_clean_then_place_in_recep-Tomato-None-GarbageCan-15/trial_T20190908_190029_853407/game.tw-pddl"
-    ],
-    "task_id": "trial_T20190908_190029_853407"
-  },
-  {
-    "idx": 45,
-    "id": "traj_0007_step007",
-    "task": "clean some tomato and put it in garbagecan.",
-    "step": 7,
-    "state_si": {
-      "current_state": "You have taken the action 1: 'go to fridge 1', action 2: 'open fridge 1', action 3: 'take tomato 1 from fridge 1', action 4: 'go to sinkbasin 1', action 5: 'clean tomato 1 with sinkbasin 1', action 6: 'go to garbagecan 1' You are now at step 7 and your current observation is: You arrive at garbagecan 1. On the garbagecan 1, you see nothing."
-    },
-    "expert_action_ai": "move tomato 1 to garbagecan 1",
-    "gamefile": [
-      "/user_home/liangyiwei/.cache/alfworld/json_2.1.1/train/pick_clean_then_place_in_recep-Tomato-None-GarbageCan-15/trial_T20190908_190029_853407/game.tw-pddl"
-    ],
-    "task_id": "trial_T20190908_190029_853407"
-  },
-  {
-    "idx": 46,
-    "id": "traj_0008_step001",
-    "task": "put a clean tomato in garbagecan.",
-    "step": 1,
-    "state_si": {
-      "current_state": "-= Welcome to TextWorld, ALFRED! =-\n\nYou are in the middle of a room. Looking quickly around you, you see a cabinet 11, a cabinet 10, a cabinet 9, a cabinet 8, a cabinet 7, a cabinet 6, a cabinet 5, a cabinet 4, a cabinet 3, a cabinet 2, a cabinet 1, a coffeemachine 1, a countertop 2, a countertop 1, a diningtable 1, a drawer 3, a drawer 2, a drawer 1, a fridge 1, a garbagecan 1, a microwave 1, a sinkbasin 1, a stoveburner 4, a stoveburner 3, a stoveburner 2, a stoveburner 1, and a toaster 1.\n\nYour task is to: put a clean tomato in garbagecan."
-    },
-    "expert_action_ai": "go to fridge 1",
-    "gamefile": [
-      "/user_home/liangyiwei/.cache/alfworld/json_2.1.1/train/pick_clean_then_place_in_recep-Tomato-None-GarbageCan-15/trial_T20190908_190007_238896/game.tw-pddl"
-    ],
-    "task_id": "trial_T20190908_190007_238896"
-  },
-  {
-    "idx": 47,
-    "id": "traj_0008_step002",
-    "task": "put a clean tomato in garbagecan.",
-    "step": 2,
-    "state_si": {
-      "current_state": "You have taken the action 1: 'go to fridge 1' You are now at step 2 and your current observation is: You arrive at fridge 1. The fridge 1 is closed."
-    },
-    "expert_action_ai": "open fridge 1",
-    "gamefile": [
-      "/user_home/liangyiwei/.cache/alfworld/json_2.1.1/train/pick_clean_then_place_in_recep-Tomato-None-GarbageCan-15/trial_T20190908_190007_238896/game.tw-pddl"
-    ],
-    "task_id": "trial_T20190908_190007_238896"
-  },
-  {
-    "idx": 48,
-    "id": "traj_0008_step003",
-    "task": "put a clean tomato in garbagecan.",
-    "step": 3,
-    "state_si": {
-      "current_state": "You have taken the action 1: 'go to fridge 1', action 2: 'open fridge 1' You are now at step 3 and your current observation is: You open the fridge 1. The fridge 1 is open. In it, you see a apple 1, a egg 2, a pan 2, and a tomato 1."
-    },
-    "expert_action_ai": "take tomato 1 from fridge 1",
-    "gamefile": [
-      "/user_home/liangyiwei/.cache/alfworld/json_2.1.1/train/pick_clean_then_place_in_recep-Tomato-None-GarbageCan-15/trial_T20190908_190007_238896/game.tw-pddl"
-    ],
-    "task_id": "trial_T20190908_190007_238896"
-  },
-  {
-    "idx": 49,
-    "id": "traj_0008_step004",
-    "task": "put a clean tomato in garbagecan.",
-    "step": 4,
-    "state_si": {
-      "current_state": "You have taken the action 1: 'go to fridge 1', action 2: 'open fridge 1', action 3: 'take tomato 1 from fridge 1' You are now at step 4 and your current observation is: You pick up the tomato 1 from the fridge 1."
-    },
-    "expert_action_ai": "go to sinkbasin 1",
-    "gamefile": [
-      "/user_home/liangyiwei/.cache/alfworld/json_2.1.1/train/pick_clean_then_place_in_recep-Tomato-None-GarbageCan-15/trial_T20190908_190007_238896/game.tw-pddl"
-    ],
-    "task_id": "trial_T20190908_190007_238896"
-  },
-  {
-    "idx": 50,
-    "id": "traj_0008_step005",
-    "task": "put a clean tomato in garbagecan.",
-    "step": 5,
-    "state_si": {
-      "current_state": "You have taken the action 1: 'go to fridge 1', action 2: 'open fridge 1', action 3: 'take tomato 1 from fridge 1', action 4: 'go to sinkbasin 1' You are now at step 5 and your current observation is: You arrive at sinkbasin 1. On the sinkbasin 1, you see nothing."
-    },
-    "expert_action_ai": "clean tomato 1 with sinkbasin 1",
-    "gamefile": [
-      "/user_home/liangyiwei/.cache/alfworld/json_2.1.1/train/pick_clean_then_place_in_recep-Tomato-None-GarbageCan-15/trial_T20190908_190007_238896/game.tw-pddl"
-    ],
-    "task_id": "trial_T20190908_190007_238896"
-  },
-  {
-    "idx": 51,
-    "id": "traj_0008_step006",
-    "task": "put a clean tomato in garbagecan.",
-    "step": 6,
-    "state_si": {
-      "current_state": "You have taken the action 1: 'go to fridge 1', action 2: 'open fridge 1', action 3: 'take tomato 1 from fridge 1', action 4: 'go to sinkbasin 1', action 5: 'clean tomato 1 with sinkbasin 1' You are now at step 6 and your current observation is: You clean the tomato 1 using the sinkbasin 1."
-    },
-    "expert_action_ai": "go to garbagecan 1",
-    "gamefile": [
-      "/user_home/liangyiwei/.cache/alfworld/json_2.1.1/train/pick_clean_then_place_in_recep-Tomato-None-GarbageCan-15/trial_T20190908_190007_238896/game.tw-pddl"
-    ],
-    "task_id": "trial_T20190908_190007_238896"
-  },
-  {
-    "idx": 52,
-    "id": "traj_0008_step007",
-    "task": "put a clean tomato in garbagecan.",
-    "step": 7,
-    "state_si": {
-      "current_state": "You have taken the action 1: 'go to fridge 1', action 2: 'open fridge 1', action 3: 'take tomato 1 from fridge 1', action 4: 'go to sinkbasin 1', action 5: 'clean tomato 1 with sinkbasin 1', action 6: 'go to garbagecan 1' You are now at step 7 and your current observation is: You arrive at garbagecan 1. On the garbagecan 1, you see nothing."
-    },
-    "expert_action_ai": "move tomato 1 to garbagecan 1",
-    "gamefile": [
-      "/user_home/liangyiwei/.cache/alfworld/json_2.1.1/train/pick_clean_then_place_in_recep-Tomato-None-GarbageCan-15/trial_T20190908_190007_238896/game.tw-pddl"
-    ],
-    "task_id": "trial_T20190908_190007_238896"
-  },
-  {
-    "idx": 53,
-    "id": "traj_0009_step001",
-    "task": "heat some mug and put it in coffeemachine.",
-    "step": 1,
-    "state_si": {
-      "current_state": "-= Welcome to TextWorld, ALFRED! =-\n\nYou are in the middle of a room. Looking quickly around you, you see a cabinet 20, a cabinet 19, a cabinet 18, a cabinet 17, a cabinet 16, a cabinet 15, a cabinet 14, a cabinet 13, a cabinet 12, a cabinet 11, a cabinet 10, a cabinet 9, a cabinet 8, a cabinet 7, a cabinet 6, a cabinet 5, a cabinet 4, a cabinet 3, a cabinet 2, a cabinet 1, a coffeemachine 1, a countertop 3, a countertop 2, a countertop 1, a drawer 3, a drawer 2, a drawer 1, a fridge 1, a garbagecan 1, a microwave 1, a shelf 3, a shelf 2, a shelf 1, a sinkbasin 1, a stoveburner 4, a stoveburner 3, a stoveburner 2, a stoveburner 1, and a toaster 1.\n\nYour task is to: heat some mug and put it in coffeemachine."
-    },
-    "expert_action_ai": "go to fridge 1",
-    "gamefile": [
-      "/user_home/liangyiwei/.cache/alfworld/json_2.1.1/train/pick_heat_then_place_in_recep-Mug-None-CoffeeMachine-5/trial_T20190908_003714_311231/game.tw-pddl"
-    ],
-    "task_id": "trial_T20190908_003714_311231"
-  },
-  {
-    "idx": 54,
-    "id": "traj_0009_step002",
-    "task": "heat some mug and put it in coffeemachine.",
-    "step": 2,
-    "state_si": {
-      "current_state": "You have taken the action 1: 'go to fridge 1' You are now at step 2 and your current observation is: You arrive at fridge 1. The fridge 1 is closed."
-    },
-    "expert_action_ai": "open fridge 1",
-    "gamefile": [
-      "/user_home/liangyiwei/.cache/alfworld/json_2.1.1/train/pick_heat_then_place_in_recep-Mug-None-CoffeeMachine-5/trial_T20190908_003714_311231/game.tw-pddl"
-    ],
-    "task_id": "trial_T20190908_003714_311231"
-  },
-  {
-    "idx": 55,
-    "id": "traj_0009_step003",
-    "task": "heat some mug and put it in coffeemachine.",
-    "step": 3,
-    "state_si": {
-      "current_state": "You have taken the action 1: 'go to fridge 1', action 2: 'open fridge 1' You are now at step 3 and your current observation is: You open the fridge 1. The fridge 1 is open. In it, you see a bowl 1, a lettuce 2, a lettuce 1, a mug 1, and a tomato 1."
-    },
-    "expert_action_ai": "take mug 1 from fridge 1",
-    "gamefile": [
-      "/user_home/liangyiwei/.cache/alfworld/json_2.1.1/train/pick_heat_then_place_in_recep-Mug-None-CoffeeMachine-5/trial_T20190908_003714_311231/game.tw-pddl"
-    ],
-    "task_id": "trial_T20190908_003714_311231"
-  },
-  {
-    "idx": 56,
-    "id": "traj_0009_step004",
-    "task": "heat some mug and put it in coffeemachine.",
-    "step": 4,
-    "state_si": {
-      "current_state": "You have taken the action 1: 'go to fridge 1', action 2: 'open fridge 1', action 3: 'take mug 1 from fridge 1' You are now at step 4 and your current observation is: You pick up the mug 1 from the fridge 1."
-    },
-    "expert_action_ai": "go to microwave 1",
-    "gamefile": [
-      "/user_home/liangyiwei/.cache/alfworld/json_2.1.1/train/pick_heat_then_place_in_recep-Mug-None-CoffeeMachine-5/trial_T20190908_003714_311231/game.tw-pddl"
-    ],
-    "task_id": "trial_T20190908_003714_311231"
-  },
-  {
-    "idx": 57,
-    "id": "traj_0009_step005",
-    "task": "heat some mug and put it in coffeemachine.",
-    "step": 5,
-    "state_si": {
-      "current_state": "You have taken the action 1: 'go to fridge 1', action 2: 'open fridge 1', action 3: 'take mug 1 from fridge 1', action 4: 'go to microwave 1' You are now at step 5 and your current observation is: You arrive at microwave 1. The microwave 1 is closed."
-    },
-    "expert_action_ai": "heat mug 1 with microwave 1",
-    "gamefile": [
-      "/user_home/liangyiwei/.cache/alfworld/json_2.1.1/train/pick_heat_then_place_in_recep-Mug-None-CoffeeMachine-5/trial_T20190908_003714_311231/game.tw-pddl"
-    ],
-    "task_id": "trial_T20190908_003714_311231"
-  },
-  {
-    "idx": 58,
-    "id": "traj_0009_step006",
-    "task": "heat some mug and put it in coffeemachine.",
-    "step": 6,
-    "state_si": {
-      "current_state": "You have taken the action 1: 'go to fridge 1', action 2: 'open fridge 1', action 3: 'take mug 1 from fridge 1', action 4: 'go to microwave 1', action 5: 'heat mug 1 with microwave 1' You are now at step 6 and your current observation is: You heat the mug 1 using the microwave 1."
-    },
-    "expert_action_ai": "go to coffeemachine 1",
-    "gamefile": [
-      "/user_home/liangyiwei/.cache/alfworld/json_2.1.1/train/pick_heat_then_place_in_recep-Mug-None-CoffeeMachine-5/trial_T20190908_003714_311231/game.tw-pddl"
-    ],
-    "task_id": "trial_T20190908_003714_311231"
-  },
-  {
-    "idx": 59,
-    "id": "traj_0009_step007",
-    "task": "heat some mug and put it in coffeemachine.",
-    "step": 7,
-    "state_si": {
-      "current_state": "You have taken the action 1: 'go to fridge 1', action 2: 'open fridge 1', action 3: 'take mug 1 from fridge 1', action 4: 'go to microwave 1', action 5: 'heat mug 1 with microwave 1', action 6: 'go to coffeemachine 1' You are now at step 7 and your current observation is: You arrive at coffeemachine 1. On the coffeemachine 1, you see nothing."
-    },
-    "expert_action_ai": "move mug 1 to coffeemachine 1",
-    "gamefile": [
-      "/user_home/liangyiwei/.cache/alfworld/json_2.1.1/train/pick_heat_then_place_in_recep-Mug-None-CoffeeMachine-5/trial_T20190908_003714_311231/game.tw-pddl"
-    ],
-    "task_id": "trial_T20190908_003714_311231"
-  },
-  {
-    "idx": 60,
-    "id": "traj_0010_step001",
-    "task": "heat some mug and put it in coffeemachine.",
-    "step": 1,
-    "state_si": {
-      "current_state": "-= Welcome to TextWorld, ALFRED! =-\n\nYou are in the middle of a room. Looking quickly around you, you see a cabinet 20, a cabinet 19, a cabinet 18, a cabinet 17, a cabinet 16, a cabinet 15, a cabinet 14, a cabinet 13, a cabinet 12, a cabinet 11, a cabinet 10, a cabinet 9, a cabinet 8, a cabinet 7, a cabinet 6, a cabinet 5, a cabinet 4, a cabinet 3, a cabinet 2, a cabinet 1, a coffeemachine 1, a countertop 3, a countertop 2, a countertop 1, a drawer 3, a drawer 2, a drawer 1, a fridge 1, a garbagecan 1, a microwave 1, a shelf 3, a shelf 2, a shelf 1, a sinkbasin 1, a stoveburner 4, a stoveburner 3, a stoveburner 2, a stoveburner 1, and a toaster 1.\n\nYour task is to: heat some mug and put it in coffeemachine."
-    },
-    "expert_action_ai": "go to countertop 1",
-    "gamefile": [
-      "/user_home/liangyiwei/.cache/alfworld/json_2.1.1/train/pick_heat_then_place_in_recep-Mug-None-CoffeeMachine-5/trial_T20190908_003743_285560/game.tw-pddl"
-    ],
-    "task_id": "trial_T20190908_003743_285560"
-  },
-  {
-    "idx": 61,
-    "id": "traj_0010_step002",
-    "task": "heat some mug and put it in coffeemachine.",
-    "step": 2,
-    "state_si": {
-      "current_state": "You have taken the action 1: 'go to countertop 1' You are now at step 2 and your current observation is: You arrive at countertop 1. On the countertop 1, you see a bread 1, a butterknife 3, a butterknife 1, a knife 1, a lettuce 2, a mug 3, a pan 1, a potato 1, a saltshaker 1, a spatula 2, and a spatula 1."
-    },
-    "expert_action_ai": "take mug 3 from countertop 1",
-    "gamefile": [
-      "/user_home/liangyiwei/.cache/alfworld/json_2.1.1/train/pick_heat_then_place_in_recep-Mug-None-CoffeeMachine-5/trial_T20190908_003743_285560/game.tw-pddl"
-    ],
-    "task_id": "trial_T20190908_003743_285560"
-  },
-  {
-    "idx": 62,
-    "id": "traj_0010_step003",
-    "task": "heat some mug and put it in coffeemachine.",
-    "step": 3,
-    "state_si": {
-      "current_state": "You have taken the action 1: 'go to countertop 1', action 2: 'take mug 3 from countertop 1' You are now at step 3 and your current observation is: You pick up the mug 3 from the countertop 1."
-    },
-    "expert_action_ai": "go to microwave 1",
-    "gamefile": [
-      "/user_home/liangyiwei/.cache/alfworld/json_2.1.1/train/pick_heat_then_place_in_recep-Mug-None-CoffeeMachine-5/trial_T20190908_003743_285560/game.tw-pddl"
-    ],
-    "task_id": "trial_T20190908_003743_285560"
-  },
-  {
-    "idx": 63,
-    "id": "traj_0010_step004",
-    "task": "heat some mug and put it in coffeemachine.",
-    "step": 4,
-    "state_si": {
-      "current_state": "You have taken the action 1: 'go to countertop 1', action 2: 'take mug 3 from countertop 1', action 3: 'go to microwave 1' You are now at step 4 and your current observation is: You arrive at microwave 1. The microwave 1 is closed."
-    },
-    "expert_action_ai": "heat mug 3 with microwave 1",
-    "gamefile": [
-      "/user_home/liangyiwei/.cache/alfworld/json_2.1.1/train/pick_heat_then_place_in_recep-Mug-None-CoffeeMachine-5/trial_T20190908_003743_285560/game.tw-pddl"
-    ],
-    "task_id": "trial_T20190908_003743_285560"
-  }]
+  }
+]

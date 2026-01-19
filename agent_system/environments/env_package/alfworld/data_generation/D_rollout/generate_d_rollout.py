@@ -72,6 +72,11 @@ class AlternativeActionSampler:
             # 从本地路径加载离线模型
             logging.info(f"从本地路径加载模型: {model_path}")
             from transformers import AutoModelForCausalLM, AutoTokenizer
+            import torch
+            
+            # 检测可用的GPU数量
+            gpu_count = torch.cuda.device_count()
+            logging.info(f"检测到 {gpu_count} 个可用GPU")
             
             # 从本地路径加载模型和分词器
             self.tokenizer = AutoTokenizer.from_pretrained(
@@ -79,12 +84,34 @@ class AlternativeActionSampler:
                 local_files_only=True,  # 只使用本地文件，不从网络下载
                 trust_remote_code=True
             )
-            self.model = AutoModelForCausalLM.from_pretrained(
-                model_path,
-                local_files_only=True,  # 只使用本地文件
-                trust_remote_code=True,
-                device_map="auto"  # 自动设备分配
-            )
+            
+            # 根据GPU数量选择设备分配策略
+            if gpu_count > 1:
+                logging.info(f"使用多GPU模式，将模型分布在 {gpu_count} 个GPU上")
+                # 多GPU情况下，使用device_map="auto"自动分配到多个GPU
+                self.model = AutoModelForCausalLM.from_pretrained(
+                    model_path,
+                    local_files_only=True,  # 只使用本地文件
+                    trust_remote_code=True,
+                    device_map="auto",  # 自动在多个GPU上分配
+                    torch_dtype=torch.float16  # 使用半精度以节省显存
+                )
+            elif gpu_count == 1:
+                logging.info("使用单GPU模式")
+                self.model = AutoModelForCausalLM.from_pretrained(
+                    model_path,
+                    local_files_only=True,
+                    trust_remote_code=True,
+                    device_map="auto"
+                )
+            else:
+                logging.info("未检测到GPU，使用CPU模式")
+                self.model = AutoModelForCausalLM.from_pretrained(
+                    model_path,
+                    local_files_only=True,
+                    trust_remote_code=True
+                )
+            
             self.model.eval()  # 设置为评估模式
             logging.info("模型加载成功")
             
@@ -167,6 +194,86 @@ class AlternativeActionSampler:
         
         return prompt
     
+    def _extract_action_robust(self, text: str) -> str:
+        """
+        鲁棒地从生成文本中提取动作。
+        
+        尝试多种模式以处理模型输出不稳定的情况：
+        1. 标准标签: <action>...</action>
+        2. 变形标签: [action]...[/action]
+        3. 不完整标签: ]go to ...[/action]
+        4. 其他格式
+        
+        参数:
+            text: 模型生成的文本
+            
+        返回:
+            提取的动作字符串，如果失败则返回空字符串
+        """
+        import re
+        
+        # 模式1: 标准的 <action>...</action>
+        match = re.search(r'<action>\s*(.*?)\s*</action>', text, re.IGNORECASE | re.DOTALL)
+        if match:
+            return match.group(1).strip()
+        
+        # 模式2: 方括号标签 [action]...[/action]
+        match = re.search(r'\[action\]\s*(.*?)\s*\[/action\]', text, re.IGNORECASE | re.DOTALL)
+        if match:
+            return match.group(1).strip()
+        
+        # 模式3: 不完整的开始标签（例如：n]go to table 1[/action]）
+        match = re.search(r'\]\s*(.*?)\s*\[/action\]', text, re.IGNORECASE | re.DOTALL)
+        if match:
+            action_text = match.group(1).strip()
+            # 移除可能的前缀字符（如 "n]"）
+            if action_text:
+                return action_text
+        
+        # 模式4: 只有结束标签的情况
+        match = re.search(r'(.*?)\s*</action>', text, re.IGNORECASE | re.DOTALL)
+        if match:
+            action_text = match.group(1).strip()
+            # 清理可能的残留标签
+            action_text = re.sub(r'.*?>', '', action_text).strip()
+            if action_text:
+                return action_text
+        
+        # 模式5: 格式 &gt; (HTML实体)
+        match = re.search(r'&gt;\s*(.*?)(?:\s|$)', text, re.IGNORECASE)
+        if match:
+            return match.group(1).strip()
+        
+        return ""
+    
+    def _match_admissible_command(self, text: str, admissible_commands: List[str]) -> str:
+        """
+        直接在生成文本中查找可执行命令。
+        
+        当标签提取失败时，尝试在文本中查找任何可执行命令。
+        
+        参数:
+            text: 模型生成的文本
+            admissible_commands: 可执行命令列表
+            
+        返回:
+            匹配的命令，如果没有匹配则返回空字符串
+        """
+        # 规范化文本（转小写）
+        text_lower = text.lower()
+        
+        # 尝试找到最长的匹配命令
+        matched_commands = []
+        for cmd in admissible_commands:
+            if cmd.lower() in text_lower:
+                matched_commands.append(cmd)
+        
+        # 返回最长的匹配（可能更精确）
+        if matched_commands:
+            return max(matched_commands, key=len)
+        
+        return ""
+    
     def sample_alternative_actions(
         self, 
         task_description: str,
@@ -234,18 +341,15 @@ class AlternativeActionSampler:
                 )
                 
                 # 从生成的文本中提取动作
-                # 查找 <action> </action> 标签
-                action_start = generated_text.find("<action>")
-                action_end = generated_text.find("</action>")
+                # 尝试多种方式提取动作标签，提高鲁棒性
+                generated_action = self._extract_action_robust(generated_text)
                 
-                if action_start != -1 and action_end != -1:
-                    generated_action = generated_text[action_start + 8:action_end].strip()
-                else:
-                    # 如果没有标签，使用整个生成的文本
-                    generated_action = generated_text.strip()
+                # 如果提取失败，尝试直接匹配可执行命令
+                if not generated_action:
+                    generated_action = self._match_admissible_command(generated_text, alternative_commands)
                 
                 # 验证生成的动作是否在替代命令中且未被采样过
-                if generated_action in alternative_commands and generated_action not in sampled_actions:
+                if generated_action and generated_action in alternative_commands and generated_action not in sampled_actions:
                     sampled_actions.append(generated_action)
                     logging.debug(f"成功采样替代动作: {generated_action}")
                 else:

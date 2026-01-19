@@ -151,6 +151,34 @@ python3 agent_system/environments/env_package/alfworld/data_generation/D_rollout
     data/d_rollout/d_rollout.jsonl
 ```
 
+## 多GPU使用
+
+生成脚本会自动检测并使用所有可用的GPU。如果有多个GPU，模型会自动分布到多个GPU上以提高推理速度：
+
+```bash
+# 检查可用GPU
+nvidia-smi
+
+# 指定使用特定GPU（通过环境变量）
+CUDA_VISIBLE_DEVICES=0,1,2,3 bash agent_system/environments/env_package/alfworld/data_generation/D_rollout/run_generate_d_rollout.sh \
+    agent_system/environments/env_package/alfworld/data_generation/D_rollout/dexpert_test.json \
+    /path/to/model \
+    3 \
+    1.0 \
+    data/d_rollout
+
+# 使用单GPU
+CUDA_VISIBLE_DEVICES=0 bash agent_system/environments/env_package/alfworld/data_generation/D_rollout/run_generate_d_rollout.sh \
+    agent_system/environments/env_package/alfworld/data_generation/D_rollout/dexpert_test.json \
+    /path/to/model
+```
+
+**多GPU特性：**
+- 自动检测可用GPU数量
+- 使用 `device_map="auto"` 在多GPU上自动分布模型
+- 多GPU模式下使用 `torch.float16` 以节省显存
+- 支持通过 `CUDA_VISIBLE_DEVICES` 控制使用哪些GPU
+
 ## 数据验证
 
 验证生成的数据集格式：
@@ -164,9 +192,11 @@ python3 agent_system/environments/env_package/alfworld/data_generation/D_rollout
 
 1. **generate_d_rollout.py**（主生成脚本）
    - 从专家轨迹文件加载数据
-   - 采样替代动作（均匀采样或模型采样）
+   - 使用离线模型推理采样替代动作
+   - 鲁棒的动作提取（支持多种标签格式）
    - 在 ALFWorld 环境中执行动作
    - 生成 D_rollout 数据集
+   - 支持多GPU加速
 
 2. **run_generate_d_rollout.sh**（Shell 包装脚本）
    - 简化命令行调用
@@ -211,20 +241,47 @@ D_rollout 数据集用于：
 
 - 增加 K 值可以采样更多替代动作
 - 调整温度参数影响采样随机性
-- 使用 `--use_model` 和 `--model_path` 启用模型采样
+- 模型会自动使用 ALFWORLD_TEMPLATE 提示进行推理
+
+### 4. 模型输出格式不稳定怎么办？
+
+脚本已实现鲁棒的动作提取，支持多种标签格式：
+- 标准格式：`<action>go to table 1</action>`
+- 方括号格式：`[action]go to table 1[/action]`
+- 不完整标签：`n]go to table 1[/action]`
+- HTML实体：`action&gt;go to table 1`
+
+如果标签提取失败，会自动在文本中查找匹配的可执行命令。
+
+### 5. 如何使用多GPU加速？
+
+脚本会自动检测并使用所有可用GPU：
+```bash
+# 使用所有GPU
+bash run_generate_d_rollout.sh ...
+
+# 指定使用GPU 0和1
+CUDA_VISIBLE_DEVICES=0,1 bash run_generate_d_rollout.sh ...
+
+# 仅使用CPU
+CUDA_VISIBLE_DEVICES="" bash run_generate_d_rollout.sh ...
+```
 
 ## 技术细节
 
 - **实现方法**：轨迹重放（Trajectory Replay）
 - **复杂度**：O(n²k)，其中 n 是专家轨迹长度，k 是替代动作数
 - **采样方式**：
-  - 默认：从可执行命令中均匀采样
-  - 可选：使用离线模型智能采样
+  - 强制使用离线模型推理采样
+  - 使用 ALFWORLD_TEMPLATE 构造提示
+  - 鲁棒的动作提取（支持多种标签格式）
+  - 如果采样不足，从剩余可执行命令中随机补充
 - **环境**：ALFWorld（基于 TextWorld 的交互式环境）
+- **多GPU支持**：自动检测和分布模型到多个GPU
 
 ## 参考文献
 
-基于 GiGPO 论文中的 D_rollout 数据集生成方法。
+基于论文 **"Agent learning via Early Experience"** 的 D_rollout 数据集生成方法。
 
 ## 许可证
 

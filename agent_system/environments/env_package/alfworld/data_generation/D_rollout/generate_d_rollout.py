@@ -371,11 +371,15 @@ class AlternativeActionSampler:
         return sampled_actions
 
 
-def build_alfworld_env(config_path: str, env_num: int = 1, seed: int = 42, is_train: bool = False):
+def build_alfworld_env(config_path: str, env_num: int = 1, seed: int = 42, is_train: bool = True):
     """构建 ALFWorld 环境。"""
-    env_kwargs = {
-        'eval_dataset': "eval_in_distribution",
-    }
+    # 根据 is_train 参数选择数据集
+    if is_train:
+        env_kwargs = {}  # 训练模式下使用默认训练数据集
+    else:
+        env_kwargs = {
+            'eval_dataset': "eval_in_distribution",
+        }
     resources_per_worker = {"num_cpus": 0.1, "num_gpus": 0.0}
     group_n = 1
     
@@ -570,6 +574,8 @@ def main():
                        help='替代动作的采样温度')
     parser.add_argument('--model_path', type=str, required=True,
                        help='用于动作采样的离线模型的本地路径（必需）')
+    parser.add_argument('--is_train', action='store_true', default=True,
+                       help='是否使用训练数据集（默认：True）')
     parser.add_argument('--log_level', type=str, default='INFO',
                        help='日志级别')
     
@@ -600,12 +606,12 @@ def main():
         return 1
     
     # 构建环境
-    logging.info("构建 ALFWorld 环境...")
+    logging.info(f"构建 ALFWorld 环境... (is_train={args.is_train})")
     config_path = os.path.join(os.path.dirname(__file__), '../configs/config_tw.yaml')
     if not os.path.exists(config_path):
         # 如果相对路径不存在，尝试使用参数中的路径
         config_path = args.config_path
-    env_manager = build_alfworld_env(config_path, env_num=1, seed=args.seed, is_train=False)
+    env_manager = build_alfworld_env(config_path, env_num=1, seed=args.seed, is_train=args.is_train)
     
     # 初始化动作采样器（使用离线模型）
     logging.info(f"初始化动作采样器: model_path={args.model_path}, temperature={args.temperature}")

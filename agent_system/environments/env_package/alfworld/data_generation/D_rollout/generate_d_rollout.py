@@ -340,33 +340,48 @@ class AlternativeActionSampler:
                     skip_special_tokens=True
                 )
                 
+                # 记录模型的原始响应（截取前200字符以避免日志过长）
+                logging.debug(f"模型响应 (尝试 {attempts}): {generated_text[:200]}...")
+                
                 # 从生成的文本中提取动作
                 # 尝试多种方式提取动作标签，提高鲁棒性
                 generated_action = self._extract_action_robust(generated_text)
                 
                 # 如果提取失败，尝试直接匹配可执行命令
                 if not generated_action:
+                    logging.debug(f"标签提取失败，尝试直接匹配可执行命令")
                     generated_action = self._match_admissible_command(generated_text, alternative_commands)
+                
+                # 记录提取的动作
+                logging.debug(f"提取的动作: '{generated_action}'")
                 
                 # 验证生成的动作是否在替代命令中且未被采样过
                 if generated_action and generated_action in alternative_commands and generated_action not in sampled_actions:
                     sampled_actions.append(generated_action)
-                    logging.debug(f"成功采样替代动作: {generated_action}")
-                else:
-                    logging.debug(f"生成的动作无效或重复: {generated_action}")
+                    logging.info(f"✓ 成功采样替代动作 {len(sampled_actions)}/{k}: '{generated_action}'")
+                elif not generated_action:
+                    logging.debug(f"✗ 无法从模型响应中提取有效动作")
+                elif generated_action == expert_action:
+                    logging.debug(f"✗ 生成的动作与专家动作相同: '{generated_action}'")
+                elif generated_action not in alternative_commands:
+                    logging.debug(f"✗ 生成的动作不在可执行命令中: '{generated_action}'")
+                elif generated_action in sampled_actions:
+                    logging.debug(f"✗ 生成的动作重复: '{generated_action}'")
                     
             except Exception as e:
                 logging.warning(f"模型推理失败 (尝试 {attempts}): {e}")
         
         if len(sampled_actions) < k:
-            logging.warning(f"只成功采样了 {len(sampled_actions)} 个替代动作（目标 {k} 个）")
+            logging.warning(f"只成功采样了 {len(sampled_actions)} 个替代动作（目标 {k} 个），共尝试 {attempts} 次")
             # 如果采样不足，从剩余的替代命令中随机选择
             remaining = [cmd for cmd in alternative_commands if cmd not in sampled_actions]
             needed = k - len(sampled_actions)
             if remaining:
                 additional = random.sample(remaining, min(needed, len(remaining)))
                 sampled_actions.extend(additional)
-                logging.info(f"添加了 {len(additional)} 个随机替代动作以达到目标数量")
+                logging.info(f"添加了 {len(additional)} 个随机替代动作: {additional}")
+            else:
+                logging.warning(f"没有剩余的替代命令可供选择")
         
         return sampled_actions
 
@@ -490,6 +505,8 @@ def generate_d_rollout_from_expert_file(
             state_si = step_entry.get('state_si', {})
             current_state = state_si.get('current_state', '')
             
+            logging.info(f"  步骤 {step_num}: 专家动作 = '{expert_action}'")
+            
             # 重置环境并重放专家动作直到此步骤
             obs, infos = env_manager.reset({})
             info = infos[env_idx]
@@ -506,8 +523,10 @@ def generate_d_rollout_from_expert_file(
             
             # 获取当前状态下的可执行命令
             admissible_commands = info.get('admissible_commands', [])
+            logging.debug(f"  可执行命令数量: {len(admissible_commands)}, 命令: {admissible_commands[:5]}...")  # 只显示前5个
             
             # 采样替代动作（使用模型推理和 ALFWORLD_TEMPLATE）
+            logging.info(f"  开始为步骤 {step_num} 采样 {k} 个替代动作...")
             alternative_actions = action_sampler.sample_alternative_actions(
                 task_description=task_desc,
                 step=step_num,

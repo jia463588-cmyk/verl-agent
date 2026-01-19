@@ -392,7 +392,14 @@ def build_alfworld_env(config_path: str, env_num: int = 1, seed: int = 42, is_tr
         env_kwargs=env_kwargs, 
         resources_per_worker=resources_per_worker
     )
-    env_manager = AlfWorldEnvironmentManager(envs, alfworld_projection, 'alfworld/AlfredTWEnv')
+    
+    # 创建一个简单的配置对象，包含 env_manager 需要的属性
+    class SimpleConfig:
+        def __init__(self):
+            self.env = type('obj', (object,), {'history_length': 0})()
+    
+    config = SimpleConfig()
+    env_manager = AlfWorldEnvironmentManager(envs, alfworld_projection, config)
     return env_manager
 
 

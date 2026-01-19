@@ -574,8 +574,8 @@ def main():
                        help='替代动作的采样温度')
     parser.add_argument('--model_path', type=str, required=True,
                        help='用于动作采样的离线模型的本地路径（必需）')
-    parser.add_argument('--is_train', action='store_true', default=True,
-                       help='是否使用训练数据集（默认：True）')
+    parser.add_argument('--is_train', type=lambda x: x.lower() != 'false', default=True,
+                       help='是否使用训练数据集（默认：True，设置为False使用评估数据集）')
     parser.add_argument('--log_level', type=str, default='INFO',
                        help='日志级别')
     

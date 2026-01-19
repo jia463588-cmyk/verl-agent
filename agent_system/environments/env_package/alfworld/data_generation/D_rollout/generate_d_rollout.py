@@ -485,12 +485,13 @@ def generate_d_rollout_from_expert_file(
             # 重置环境并重放专家动作直到此步骤
             obs, infos = env_manager.reset({})
             info = infos[env_idx]
+            batch_size = len(obs['text'])  # 获取批次大小
             
             # 重放前面步骤的专家动作
             for prev_step_entry in expert_steps[:step_num - 1]:
                 prev_action = prev_step_entry.get('expert_action_ai', '')
                 if prev_action:
-                    actions = ["None"] * env_manager.num_processes
+                    actions = ["None"] * batch_size
                     actions[env_idx] = prev_action
                     obs, _, _, infos = env_manager.step(actions)
                     info = infos[env_idx]
@@ -516,17 +517,18 @@ def generate_d_rollout_from_expert_file(
             for alt_idx, alt_action in enumerate(alternative_actions):
                 # 为每个替代动作重置并重放
                 obs_branch, infos_branch = env_manager.reset({})
+                batch_size_branch = len(obs_branch['text'])  # 获取批次大小
                 
                 # 重放到当前步骤
                 for prev_step_entry in expert_steps[:step_num - 1]:
                     prev_action = prev_step_entry.get('expert_action_ai', '')
                     if prev_action:
-                        actions_replay = ["None"] * env_manager.num_processes
+                        actions_replay = ["None"] * batch_size_branch
                         actions_replay[env_idx] = prev_action
                         obs_branch, _, _, infos_branch = env_manager.step(actions_replay)
                 
                 # 执行替代动作
-                actions_alt = ["None"] * env_manager.num_processes
+                actions_alt = ["None"] * batch_size_branch
                 actions_alt[env_idx] = alt_action
                 obs_alt, _, _, _ = env_manager.step(actions_alt)
                 

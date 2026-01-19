@@ -161,7 +161,7 @@ class AlternativeActionSampler:
             task_description: 任务描述（从 D_expert 的 task 字段）
             step: 当前步骤编号（从 D_expert 的 step 字段）
             current_state: 完整的当前状态（从 D_expert 的 state_si.current_state 字段）
-            admissible_commands: 可执行命令列表（从环境返回）
+            admissible_commands: 可执行命令列表（从 D_expert 的 admissible_actions 字段）
             
         返回:
             构造的提示字符串
@@ -178,8 +178,9 @@ class AlternativeActionSampler:
         # 当前步骤
         current_step = step
         
-        # 格式化可执行命令
-        admissible_actions_str = ", ".join(admissible_commands)
+        # 格式化可执行命令（排除 help 和 inventory 等系统命令）
+        filtered_commands = [cmd for cmd in admissible_commands if cmd not in ['help', 'inventory', 'look']]
+        admissible_actions_str = ", ".join(filtered_commands)
         
         # 使用 ALFWORLD_TEMPLATE 构造提示
         prompt = ALFWORLD_TEMPLATE.format(
@@ -477,14 +478,15 @@ def generate_d_rollout_from_expert_file(
     """
     从预收集的专家轨迹生成 D_rollout。
     
-    对于每个专家轨迹中的每个步骤：
-    1. 通过重放专家动作将环境设置到该状态
-    2. 采样 K 个不同于专家动作的替代动作
-    3. 执行每个替代动作以获取 next_state_sji
-    4. 以与 D_expert 兼容的格式存储
+    处理流程：
+    1. 从 D_expert 文件直接读取 admissible_actions 字段
+    2. 使用这些可执行命令构造完整的提示并生成替代动作
+    3. 通过环境回放专家轨迹到指定状态
+    4. 执行替代动作获取下一状态
+    5. 以与 D_expert 兼容的格式存储
     
     参数:
-        env_manager: 环境管理器
+        env_manager: 环境管理器（仅用于执行动作获取状态）
         expert_trajectories: 专家轨迹字典列表
         action_sampler: 用于生成替代动作的动作采样器
         env_idx: 要使用的环境索引
@@ -502,6 +504,7 @@ def generate_d_rollout_from_expert_file(
         traj_idx = traj_data['idx']
         expert_steps = traj_data['steps']
         
+        logging.info(f"\n{'='*60}")
         logging.info(f"处理轨迹 {traj_idx} (task_id: {task_id})，共 {len(expert_steps)} 步")
         
         for step_entry in expert_steps:
@@ -509,29 +512,15 @@ def generate_d_rollout_from_expert_file(
             expert_action = step_entry.get('expert_action_ai', '')
             state_si = step_entry.get('state_si', {})
             current_state = state_si.get('current_state', '')
+            # 从 D_expert 文件直接读取可执行命令
+            admissible_commands = step_entry.get('admissible_actions', [])
             
-            logging.info(f"  步骤 {step_num}: 专家动作 = '{expert_action}'")
+            logging.info(f"\n步骤 {step_num}: 专家动作 = '{expert_action}'")
+            logging.info(f"可执行命令数量: {len(admissible_commands)}")
+            logging.info(f"可执行命令: {admissible_commands}")
             
-            # 重置环境并重放专家动作直到此步骤
-            obs, infos = env_manager.reset({})
-            info = infos[env_idx]
-            batch_size = len(obs['text'])  # 获取批次大小
-            
-            # 重放前面步骤的专家动作
-            for prev_step_entry in expert_steps[:step_num - 1]:
-                prev_action = prev_step_entry.get('expert_action_ai', '')
-                if prev_action:
-                    actions = ["None"] * batch_size
-                    actions[env_idx] = prev_action
-                    obs, _, _, infos = env_manager.step(actions)
-                    info = infos[env_idx]
-            
-            # 获取当前状态下的可执行命令
-            admissible_commands = info.get('admissible_commands', [])
-            logging.info(f"  可执行命令数量: {len(admissible_commands)}, 命令: {admissible_commands}")
-            
-            # 采样替代动作（使用模型推理和 ALFWORLD_TEMPLATE）
-            logging.info(f"  开始为步骤 {step_num} 采样 {k} 个替代动作...")
+            # 采样替代动作（使用从 D_expert 读取的 admissible_commands 构造提示）
+            logging.info(f"\n开始为步骤 {step_num} 采样 {k} 个替代动作...")
             alternative_actions = action_sampler.sample_alternative_actions(
                 task_description=task_desc,
                 step=step_num,
@@ -542,36 +531,59 @@ def generate_d_rollout_from_expert_file(
             )
             
             if len(alternative_actions) == 0:
-                logging.debug(f"步骤 {step_num} 没有替代动作，跳过")
+                logging.warning(f"步骤 {step_num} 没有替代动作，跳过")
                 continue
             
-            # 执行每个替代动作
+            logging.info(f"\n成功采样了 {len(alternative_actions)} 个替代动作，开始执行并获取下一状态...")
+            
+            # 执行每个替代动作以获取下一状态
             for alt_idx, alt_action in enumerate(alternative_actions):
-                # 为每个替代动作重置并重放
-                obs_branch, infos_branch = env_manager.reset({})
-                batch_size_branch = len(obs_branch['text'])  # 获取批次大小
+                logging.info(f"\n执行替代动作 {alt_idx + 1}/{len(alternative_actions)}: '{alt_action}'")
                 
-                # 重放到当前步骤
+                # 重置环境并回放专家轨迹到当前步骤
+                obs_branch, infos_branch = env_manager.reset({})
+                batch_size = len(obs_branch['text'])  # 动态获取批次大小
+                
+                # 回放前面步骤的专家动作
+                logging.debug(f"回放前 {step_num - 1} 步的专家动作...")
                 for prev_step_entry in expert_steps[:step_num - 1]:
                     prev_action = prev_step_entry.get('expert_action_ai', '')
                     if prev_action:
-                        actions_replay = ["None"] * batch_size_branch
+                        actions_replay = ["None"] * batch_size
                         actions_replay[env_idx] = prev_action
                         obs_branch, _, _, infos_branch = env_manager.step(actions_replay)
                 
                 # 执行替代动作
-                actions_alt = ["None"] * batch_size_branch
+                logging.debug(f"执行替代动作: '{alt_action}'")
+                actions_alt = ["None"] * batch_size
                 actions_alt[env_idx] = alt_action
-                obs_alt, _, _, _ = env_manager.step(actions_alt)
+                obs_alt, _, _, infos_alt = env_manager.step(actions_alt)
                 
-                # 获取结果状态
-                next_state = obs_alt['text'][env_idx]
+                # 获取执行替代动作后的下一状态
+                next_state_text = obs_alt['text'][env_idx]
+                # 获取执行替代动作后的可执行命令
+                next_admissible_commands = infos_alt[env_idx].get('admissible_commands', [])
+                
+                logging.info(f"下一状态: {next_state_text[:100]}...")
                 
                 # 全局计数器递增
                 global_idx += 1
                 
+                # 构造下一状态（格式与 current_state 保持一致）
+                # 包含历史动作信息
+                if step_num == 1:
+                    # 第一步，只有当前动作
+                    next_state_formatted = f"You have taken the action 1: '{alt_action}' You are now at step {step_num + 1} and your current observation is: {next_state_text}"
+                else:
+                    # 后续步骤，累积历史动作
+                    action_history_text, _ = action_sampler._parse_action_history_and_observation(current_state)
+                    if action_history_text:
+                        # 已有历史动作，添加新动作
+                        next_state_formatted = f"{action_history_text}, action {step_num}: '{alt_action}' You are now at step {step_num + 1} and your current observation is: {next_state_text}"
+                    else:
+                        next_state_formatted = f"You have taken the action {step_num}: '{alt_action}' You are now at step {step_num + 1} and your current observation is: {next_state_text}"
+                
                 # 以与 D_expert 兼容的格式创建条目
-                # idx 字段表示这是数据集中的第几条记录（全局计数）
                 rollout_entry = {
                     'task_id': task_id,
                     'idx': global_idx,  # 全局数据集计数，从1开始递增
@@ -579,14 +591,19 @@ def generate_d_rollout_from_expert_file(
                     'task': task_desc,
                     'step': step_num,
                     'state_si': state_si,
+                    'admissible_actions': admissible_commands,  # 添加可执行命令字段
                     'expert_action_ai': expert_action,
                     'alternative_action_j': alt_action,
-                    'next_state_sji': next_state,
+                    'next_state_sji': next_state_formatted,  # 格式化后的下一状态
+                    'next_admissible_actions': next_admissible_commands,  # 下一状态的可执行命令
+                    'gamefile': step_entry.get('gamefile', []),  # 保留游戏文件信息
                     'is_expert': False
                 }
                 all_d_rollout_entries.append(rollout_entry)
+                
+                logging.debug(f"已创建 rollout 条目 {global_idx}")
         
-        logging.info(f"为轨迹 {traj_idx} 生成了 {len([e for e in all_d_rollout_entries if e['task_id'] == task_id])} 条 rollout 条目")
+        logging.info(f"\n为轨迹 {traj_idx} 生成了 {len([e for e in all_d_rollout_entries if e['task_id'] == task_id])} 条 rollout 条目")
     
     return all_d_rollout_entries
 

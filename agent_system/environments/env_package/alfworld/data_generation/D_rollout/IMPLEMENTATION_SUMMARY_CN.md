@@ -78,7 +78,7 @@
 ✅ **要求 3：D_rollout 数据集构造**
 - 格式：D_rollout = {(si, aj, sj) | i ∈ [N], j ∈ [K]}
 - JSONL 输出，包含完整的状态-动作-状态元组
-- 包括 admissible_actions 和 next_admissible_actions 字段
+- 包括 admissible_actions 字段（从 D_expert 读取）
 - 生成详细的统计文件
 
 ### 架构
@@ -90,7 +90,7 @@
 
 AlternativeActionSampler（替代动作采样器）
   └─ 使用 D_expert 中的 admissible_actions 构造完整提示
-  └─ 使用离线模型推理生成替代动作
+  └─ 使用离线模型推理生成替代动作（应用 chat template）
   └─ 鲁棒的动作提取（支持多种标签格式）
   └─ 为每个状态采样 K 个替代动作
 
@@ -118,7 +118,6 @@ D_rollout.jsonl 中的每个条目（新格式，与 D_expert 兼容）：
   "expert_action_ai": "go to coffeemachine 1",
   "alternative_action_j": "go to fridge 1",
   "next_state_sji": "You have taken the action 1: 'go to fridge 1' You are now at step 2 and your current observation is: You arrive at fridge 1. On the fridge 1, you see a apple 1, a bowl 2, ...",
-  "next_admissible_actions": ["examine fridge 1", "go to cabinet 1", "..."],
   "gamefile": ["/path/to/game.tw-pddl"],
   "is_expert": false
 }

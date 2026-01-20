@@ -85,6 +85,10 @@ class AlternativeActionSampler:
                 trust_remote_code=True
             )
             
+            # 设置 pad_token（如果未设置）
+            if self.tokenizer.pad_token is None:
+                self.tokenizer.pad_token = self.tokenizer.eos_token
+            
             # 根据GPU数量选择设备分配策略
             if gpu_count > 1:
                 logging.info(f"使用多GPU模式，将模型分布在 {gpu_count} 个GPU上")
@@ -325,21 +329,46 @@ class AlternativeActionSampler:
             attempts += 1
             
             try:
-                inputs = self.tokenizer(prompt, return_tensors="pt").to(self.model.device)
+                # 使用 chat template 格式化提示（适配 Instruct 模型）
+                # 参考 inference_alfworld.py 第125行
+                messages = [{"role": "user", "content": prompt}]
+                
+                try:
+                    # 尝试使用 chat template（适用于 Llama-3.1-8B-Instruct 等聊天模型）
+                    input_text = self.tokenizer.apply_chat_template(
+                        messages, 
+                        tokenize=False, 
+                        add_generation_prompt=True
+                    )
+                except Exception:
+                    # 如果 chat template 不可用，直接使用原始提示
+                    input_text = prompt
+                
+                inputs = self.tokenizer(input_text, return_tensors="pt", truncation=True, max_length=2048)
+                
+                # 获取模型设备
+                target_device = getattr(self.model, "device", None)
+                if target_device is None:
+                    try:
+                        target_device = next(self.model.parameters()).device
+                    except StopIteration:
+                        target_device = "cpu"
+                
+                inputs = {k: v.to(target_device) for k, v in inputs.items()}
                 
                 with torch.no_grad():
                     outputs = self.model.generate(
                         **inputs,
-                        max_new_tokens=100,
+                        max_new_tokens=512,  # 增加以允许完整的思考和动作输出
                         temperature=self.temperature,
                         do_sample=True,
-                        pad_token_id=self.tokenizer.eos_token_id
+                        pad_token_id=self.tokenizer.pad_token_id if self.tokenizer.pad_token_id else self.tokenizer.eos_token_id
                     )
                 
                 generated_text = self.tokenizer.decode(
-                    outputs[0][inputs.input_ids.shape[1]:], 
+                    outputs[0][inputs['input_ids'].shape[1]:], 
                     skip_special_tokens=True
-                )
+                ).strip()
                 
                 # 记录完整的模型响应
                 logging.info(f"=== MODEL RESPONSE (尝试 {attempts}) ===")
@@ -557,8 +586,6 @@ def generate_d_rollout_from_expert_file(
                 
                 # 获取执行替代动作后的下一状态
                 next_state_text = obs_alt['text'][env_idx]
-                # 获取执行替代动作后的可执行命令
-                next_admissible_commands = infos_alt[env_idx].get('admissible_commands', [])
                 
                 logging.info(f"下一状态: {next_state_text[:100]}...")
                 
@@ -591,7 +618,6 @@ def generate_d_rollout_from_expert_file(
                     'expert_action_ai': expert_action,
                     'alternative_action_j': alt_action,
                     'next_state_sji': next_state_formatted,  # 格式化后的下一状态
-                    'next_admissible_actions': next_admissible_commands,  # 下一状态的可执行命令
                     'gamefile': step_entry.get('gamefile', []),  # 保留游戏文件信息
                     'is_expert': False
                 }

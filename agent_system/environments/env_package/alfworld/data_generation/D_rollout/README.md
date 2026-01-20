@@ -35,7 +35,6 @@ Output D_rollout dataset uses JSONL format compatible with D_expert:
   "expert_action_ai": "go to coffeemachine 1",
   "alternative_action_j": "go to fridge 1",
   "next_state_sji": "You have taken the action 1: 'go to fridge 1' You are now at step 2 and your current observation is: You arrive at fridge 1. On the fridge 1, you see a apple 1, a bowl 2, ...",
-  "next_admissible_actions": ["examine fridge 1", "go to cabinet 1", "..."],
   "gamefile": ["/path/to/game.tw-pddl"],
   "is_expert": false
 }
@@ -52,10 +51,8 @@ Output D_rollout dataset uses JSONL format compatible with D_expert:
 - `expert_action_ai`: Action chosen by expert agent
 - `alternative_action_j`: Sampled alternative action (different from expert action)
 - `next_state_sji`: Resulting state after executing alternative_action_j (format matches current_state)
-- `next_admissible_actions`: List of admissible commands after executing alternative action
 - `gamefile`: Game file path
 - `is_expert`: Boolean flag (always false for rollout entries)
-- `is_expert`: Boolean flag (false for alternative actions)
 
 **About the idx field:**
 - `idx` is a global counter indicating the position of this entry in the entire D_rollout dataset

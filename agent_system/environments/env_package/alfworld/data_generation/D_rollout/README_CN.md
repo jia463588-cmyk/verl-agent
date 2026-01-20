@@ -35,7 +35,6 @@ D_rollout 数据集生成流程：
   "expert_action_ai": "go to coffeemachine 1",
   "alternative_action_j": "go to fridge 1",
   "next_state_sji": "You have taken the action 1: 'go to fridge 1' You are now at step 2 and your current observation is: You arrive at fridge 1. On the fridge 1, you see a apple 1, a bowl 2, ...",
-  "next_admissible_actions": ["examine fridge 1", "go to cabinet 1", "..."],
   "gamefile": ["/path/to/game.tw-pddl"],
   "is_expert": false
 }
@@ -52,7 +51,6 @@ D_rollout 数据集生成流程：
 - `expert_action_ai`: 专家智能体选择的动作
 - `alternative_action_j`: 采样的替代动作（不同于专家动作）
 - `next_state_sji`: 执行 alternative_action_j 后的结果状态（格式与 current_state 一致）
-- `next_admissible_actions`: 执行替代动作后的可执行命令列表
 - `gamefile`: 游戏文件路径
 - `is_expert`: 布尔标志，对于 D_rollout 条目始终为 false
 

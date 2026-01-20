@@ -103,12 +103,12 @@ TrajectoryReplay（轨迹重放）
 
 ### 数据格式
 
-D_rollout.jsonl 中的每个条目（新格式，与 D_expert 兼容）：
+D_rollout.json 中的每个条目（新格式，与 D_expert 兼容）：
 ```json
 {
   "task_id": "trial_T20190908_110055_655553",
   "idx": 1,
-  "id": "rollout_000001",
+  "id": "traj_0001_step001_rollout001",
   "task": "put a cool mug in coffeemachine.",
   "step": 1,
   "state_si": {

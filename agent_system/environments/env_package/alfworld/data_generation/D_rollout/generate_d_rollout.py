@@ -38,6 +38,7 @@ from typing import List, Dict, Tuple
 from collections import defaultdict
 import copy
 import random
+from tqdm import tqdm
 
 # 环境导入
 import sys
@@ -523,7 +524,8 @@ def generate_d_rollout_from_expert_file(
     all_d_rollout_entries = []
     global_idx = 0  # 初始化全局数据集计数器，从0开始（将在第一次使用时递增到1）
     
-    for traj_data in expert_trajectories:
+    # 使用 tqdm 显示进度条
+    for traj_data in tqdm(expert_trajectories, desc="处理专家轨迹", unit="轨迹"):
         task_id = traj_data['task_id']
         task_desc = traj_data['task']
         traj_idx = traj_data['idx']
@@ -562,8 +564,8 @@ def generate_d_rollout_from_expert_file(
             logging.info(f"\n成功采样了 {len(alternative_actions)} 个替代动作，开始执行并获取下一状态...")
             
             # 执行每个替代动作以获取下一状态
-            for alt_idx, alt_action in enumerate(alternative_actions):
-                logging.info(f"\n执行替代动作 {alt_idx + 1}/{len(alternative_actions)}: '{alt_action}'")
+            for alt_idx, alt_action in enumerate(alternative_actions, start=1):
+                logging.info(f"\n执行替代动作 {alt_idx}/{len(alternative_actions)}: '{alt_action}'")
                 
                 # 重置环境并回放专家轨迹到当前步骤
                 obs_branch, infos_branch = env_manager.reset({})
@@ -608,10 +610,14 @@ def generate_d_rollout_from_expert_file(
                         next_state_formatted = f"You have taken the action {step_num}: '{alt_action}' You are now at step {step_num + 1} and your current observation is: {next_state_text}"
                 
                 # 以与 D_expert 兼容的格式创建条目
+                # ID 格式: traj_XXXX_stepYYY_rolloutZZZ
+                # XXXX = 轨迹索引, YYY = 步骤编号, ZZZ = 该步骤的第几个替代动作
+                rollout_id = f'traj_{traj_idx:04d}_step{step_num:03d}_rollout{alt_idx:03d}'
+                
                 rollout_entry = {
                     'task_id': task_id,
                     'idx': global_idx,  # 全局数据集计数，从1开始递增
-                    'id': f'rollout_{global_idx:06d}',  # 基于全局计数的唯一ID
+                    'id': rollout_id,  # 描述性的唯一ID
                     'task': task_desc,
                     'step': step_num,
                     'state_si': state_si,

@@ -25,7 +25,7 @@ Output D_rollout dataset uses JSON format compatible with D_expert:
 {
   "task_id": "trial_T20190908_110055_655553",
   "idx": 1,
-  "id": "rollout_000001",
+  "id": "traj_0001_step001_rollout001",
   "task": "put a cool mug in coffeemachine.",
   "step": 1,
   "state_si": {
@@ -43,7 +43,7 @@ Output D_rollout dataset uses JSON format compatible with D_expert:
 **Field descriptions:**
 - `task_id`: Unique identifier for the task/trajectory
 - `idx`: **Global dataset counter** (represents the position of this entry in the entire D_rollout dataset, incrementing from 1)
-- `id`: Unique entry ID (format: rollout_XXXXXX)
+- `id`: Unique entry ID (format: `traj_XXXX_stepYYY_rolloutZZZ` where XXXX is trajectory index from D_expert, YYY is step number, ZZZ is alternative action number)
 - `task`: Task description/goal
 - `step`: Step number in trajectory (1-indexed)
 - `state_si.current_state`: Full state with action history and current observation

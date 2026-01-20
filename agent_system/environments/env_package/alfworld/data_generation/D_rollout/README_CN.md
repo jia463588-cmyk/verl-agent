@@ -25,7 +25,7 @@ D_rollout 数据集生成流程：
 {
   "task_id": "trial_T20190908_110055_655553",
   "idx": 1,
-  "id": "rollout_000001",
+  "id": "traj_0001_step001_rollout001",
   "task": "put a cool mug in coffeemachine.",
   "step": 1,
   "state_si": {
@@ -43,7 +43,7 @@ D_rollout 数据集生成流程：
 **字段说明：**
 - `task_id`: 任务/轨迹的唯一标识符
 - `idx`: **全局数据集计数**（表示这是数据集中的第几条记录，从1开始递增，等于数据集中的条目总数）
-- `id`: 该条目的唯一标识符（格式：rollout_XXXXXX）
+- `id`: 该条目的唯一标识符（格式：`traj_XXXX_stepYYY_rolloutZZZ`，其中 XXXX 是 D_expert 中的轨迹索引，YYY 是步骤编号，ZZZ 是该步骤的第几个替代动作）
 - `task`: 任务描述/目标
 - `step`: 轨迹中的步骤编号（从1开始）
 - `state_si.current_state`: 完整状态，包含动作历史和当前观察

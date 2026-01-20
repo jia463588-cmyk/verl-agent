@@ -29,7 +29,7 @@
    - 从预收集的 D_expert 数据加载专家轨迹
    - 替代动作采样（从可接受命令中均匀采样）
    - 通过轨迹重放方法收集状态转移
-   - 输出 JSONL 格式及统计信息
+   - 输出 JSON 格式及统计信息
 
 2. **run_generate_d_rollout.sh** (35 行)
    - 常见用例的便捷 Shell 包装器
@@ -77,7 +77,7 @@
 
 ✅ **要求 3：D_rollout 数据集构造**
 - 格式：D_rollout = {(si, aj, sj) | i ∈ [N], j ∈ [K]}
-- JSONL 输出，包含完整的状态-动作-状态元组
+- JSON 输出，包含完整的状态-动作-状态元组
 - 包括 admissible_actions 字段（从 D_expert 读取）
 - 生成详细的统计文件
 
@@ -152,7 +152,7 @@ bash agent_system/environments/env_package/alfworld/data_generation/D_rollout/ru
 ```bash
 # 分析生成的数据集
 python3 agent_system/environments/env_package/alfworld/data_generation/D_rollout/analyze_d_rollout.py \
-    data/d_rollout/d_rollout.jsonl \
+    data/d_rollout/d_rollout.json \
     --output data/d_rollout/analysis.json
 ```
 

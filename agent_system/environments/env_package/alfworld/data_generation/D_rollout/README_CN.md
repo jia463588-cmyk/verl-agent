@@ -19,7 +19,7 @@ D_rollout 数据集生成流程：
 
 ### 数据集格式
 
-输出的 D_rollout 数据集采用与 D_expert 兼容的 JSONL 格式：
+输出的 D_rollout 数据集采用与 D_expert 兼容的 JSON 格式：
 
 ```json
 {
@@ -143,7 +143,7 @@ python3 -m agent_system.environments.env_package.alfworld.data_generation.D_roll
 
 生成的文件将保存在指定的输出目录中：
 
-- `d_rollout.jsonl`: 主数据文件，包含所有 (s_i, a_j, s_j) 元组
+- `d_rollout.json`: 主数据文件，包含所有 (s_i, a_j, s_j) 元组
 - `d_rollout_stats.json`: 统计信息文件
 
 ## 数据分析
@@ -152,7 +152,7 @@ python3 -m agent_system.environments.env_package.alfworld.data_generation.D_roll
 
 ```bash
 python3 agent_system/environments/env_package/alfworld/data_generation/D_rollout/analyze_d_rollout.py \
-    data/d_rollout/d_rollout.jsonl
+    data/d_rollout/d_rollout.json
 ```
 
 ## 多GPU使用
@@ -189,7 +189,7 @@ CUDA_VISIBLE_DEVICES=0 bash agent_system/environments/env_package/alfworld/data_
 
 ```bash
 python3 agent_system/environments/env_package/alfworld/data_generation/D_rollout/validate_d_rollout.py \
-    data/d_rollout/d_rollout.jsonl
+    data/d_rollout/d_rollout.json
 ```
 
 ## 工具文件说明

@@ -584,8 +584,9 @@ def generate_d_rollout_from_expert_file(
                 actions_alt[env_idx] = alt_action
                 obs_alt, _, _, infos_alt = env_manager.step(actions_alt)
                 
-                # 获取执行替代动作后的下一状态
-                next_state_text = obs_alt['text'][env_idx]
+                # 获取执行替代动作后的原始观察（不是格式化的模板）
+                # obs_alt['anchor'] 包含原始文本观察，obs_alt['text'] 包含格式化的模板
+                next_state_text = obs_alt['anchor'][env_idx]
                 
                 logging.info(f"下一状态: {next_state_text[:100]}...")
                 
@@ -708,13 +709,12 @@ def main():
     
     logging.info(f"从专家文件生成了 {len(all_d_rollout_entries)} 条 rollout 条目")
     
-    # 保存 D_rollout 数据集
-    output_file = os.path.join(args.output_dir, 'd_rollout.jsonl')
+    # 保存 D_rollout 数据集（JSON 格式，不是 JSONL）
+    output_file = os.path.join(args.output_dir, 'd_rollout.json')
     logging.info(f"\n将 D_rollout 数据集保存到 {output_file}...")
     
     with open(output_file, 'w', encoding='utf-8') as f:
-        for entry in all_d_rollout_entries:
-            f.write(json.dumps(entry, ensure_ascii=False) + '\n')
+        json.dump(all_d_rollout_entries, f, ensure_ascii=False, indent=2)
     
     # 保存统计信息
     stats = {

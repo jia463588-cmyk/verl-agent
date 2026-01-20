@@ -19,7 +19,7 @@ D_rollout dataset generation workflow:
 
 ### Dataset Format
 
-Output D_rollout dataset uses JSONL format compatible with D_expert:
+Output D_rollout dataset uses JSON format compatible with D_expert:
 
 ```json
 {
@@ -138,7 +138,7 @@ python3 -m agent_system.environments.env_package.alfworld.data_generation.D_roll
 
 Generated files are saved in the specified output directory:
 
-- `d_rollout.jsonl`: Main data file containing all (s_i, a_j, s_j) tuples
+- `d_rollout.json`: Main data file containing all (s_i, a_j, s_j) tuples
 - `d_rollout_stats.json`: Statistics file
 
 ## Data Analysis
@@ -147,7 +147,7 @@ Use the analysis tool to view dataset statistics:
 
 ```bash
 python3 agent_system/environments/env_package/alfworld/data_generation/D_rollout/analyze_d_rollout.py \
-    data/d_rollout/d_rollout.jsonl
+    data/d_rollout/d_rollout.json
 ```
 
 ## Data Validation
@@ -156,7 +156,7 @@ Validate the generated dataset format:
 
 ```bash
 python3 agent_system/environments/env_package/alfworld/data_generation/D_rollout/validate_d_rollout.py \
-    data/d_rollout/d_rollout.jsonl
+    data/d_rollout/d_rollout.json
 ```
 
 ## Tool Files

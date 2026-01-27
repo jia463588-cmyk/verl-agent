@@ -604,7 +604,11 @@ def generate_d_rollout_from_expert_file(
                     # 后续步骤，累积历史动作
                     action_history_text, _ = action_sampler._parse_action_history_and_observation(current_state)
                     if action_history_text:
-                        # 已有历史动作，添加新动作
+                        # 已有历史动作，需要移除末尾可能存在的 "You are now at step X and"
+                        import re
+                        # 移除末尾的 "You are now at step N and" 模式
+                        action_history_text = re.sub(r'\s*You are now at step \d+ and\s*$', '', action_history_text).strip()
+                        # 添加新动作
                         next_state_formatted = f"{action_history_text}, action {step_num}: '{alt_action}' You are now at step {step_num + 1} and your current observation is: {next_state_text}"
                     else:
                         next_state_formatted = f"You have taken the action {step_num}: '{alt_action}' You are now at step {step_num + 1} and your current observation is: {next_state_text}"

@@ -17,15 +17,45 @@ from typing import List, Dict
 
 
 def load_d_rollout_data(filepath: str) -> List[Dict]:
-    """从 JSONL 文件加载 D_rollout 数据集"""
+    """
+    从 JSON 文件加载 D_rollout 数据集。
+    
+    支持两种格式：
+    1. JSON 格式（当前格式）：整个列表作为单个 JSON 对象
+    2. JSONL 格式（旧格式）：每行一个 JSON 对象
+    
+    参数:
+        filepath: 数据文件路径
+        
+    返回:
+        D_rollout 条目列表
+    """
     data = []
+    
     with open(filepath, 'r', encoding='utf-8') as f:
-        for line_num, line in enumerate(f, 1):
+        first_char = f.read(1)
+        f.seek(0)
+        
+        # 判断文件格式：如果以 '[' 开头，则为 JSON 格式；否则为 JSONL 格式
+        if first_char == '[':
+            # JSON 格式（当前格式）
             try:
-                entry = json.loads(line)
-                data.append(entry)
+                data = json.load(f)
+                if not isinstance(data, list):
+                    print(f"警告：期望数据为列表格式，但得到 {type(data)}")
+                    return []
             except json.JSONDecodeError as e:
-                print(f"警告：无法解析第 {line_num} 行：{e}")
+                print(f"错误：无法解析 JSON 文件：{e}")
+                return []
+        else:
+            # JSONL 格式（旧格式）
+            for line_num, line in enumerate(f, 1):
+                try:
+                    entry = json.loads(line)
+                    data.append(entry)
+                except json.JSONDecodeError as e:
+                    print(f"警告：无法解析第 {line_num} 行：{e}")
+    
     return data
 
 
@@ -280,8 +310,10 @@ def print_analysis_report(data: List[Dict], output_file: str = None):
 
 def main():
     parser = argparse.ArgumentParser(description='分析 D_rollout 数据集')
-    parser.add_argument('input_file', type=str, help='D_rollout JSONL 文件路径')
-    parser.add_argument('--output', type=str, help='保存分析报告的路径（JSON 格式）')
+    parser.add_argument('input_file', type=str, 
+                       help='D_rollout 数据文件路径（支持 JSON 或 JSONL 格式）')
+    parser.add_argument('--output', type=str, 
+                       help='保存分析报告的路径（JSON 格式）')
     
     args = parser.parse_args()
     
@@ -291,6 +323,11 @@ def main():
     
     print(f"从以下位置加载数据：{args.input_file}")
     data = load_d_rollout_data(args.input_file)
+    
+    if len(data) == 0:
+        print("错误：未能加载任何数据")
+        return 1
+    
     print(f"已加载 {len(data)} 条目")
     print()
     

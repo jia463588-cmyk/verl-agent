@@ -37,14 +37,20 @@
 
 3. **analyze_d_rollout.py** (305 行)
    - 数据集分析和质量检查（中文注释）
-   - 统计计算
-   - 动作分布分析
-   - 数据验证
+   - 支持 JSON 和 JSONL 两种格式
+   - 统计计算（条目数、唯一状态数、动作数等）
+   - 动作分布分析（最常见的动作等）
+   - 步骤分布分析
+   - 数据质量检查（缺失字段、空值、重复等）
+   - 可生成 JSON 格式的分析报告
 
-4. **validate_d_rollout.py** (207 行)
-   - 无需依赖的结构验证（中文注释）
-   - 格式检查
-   - 逻辑验证
+4. **validate_d_rollout.py** (550+ 行)
+   - 数据集验证工具（中文注释）
+   - 格式验证（字段完整性、类型检查）
+   - 一致性验证（idx 唯一性、ID 格式、空值等）
+   - **环境回放验证**：可选择使用 ALFWorld 环境回放验证 next_state 的正确性
+   - 对比数据集中的 next_state 与环境实际返回的 next_state
+   - 可生成 JSON 格式的验证报告
 
 5. **README.md & README_CN.md** (308 行)
    - 综合文档（中英双语）
@@ -200,27 +206,52 @@ python3 agent_system/environments/env_package/alfworld/data_generation/D_rollout
 ## 测试和验证
 
 ### 验证脚本
+
+基本验证：
 ```bash
-python3 agent_system/environments/env_package/alfworld/data_generation/D_rollout/validate_d_rollout.py
+# 验证数据格式和一致性
+python3 agent_system/environments/env_package/alfworld/data_generation/D_rollout/validate_d_rollout.py \
+    data/d_rollout/d_rollout.json
+```
+
+环境回放验证：
+```bash
+# 使用环境回放验证 next_state 的正确性
+python3 agent_system/environments/env_package/alfworld/data_generation/D_rollout/validate_d_rollout.py \
+    data/d_rollout/d_rollout.json \
+    --verify_env \
+    --sample_size 10 \
+    --output validation_report.json
 ```
 
 检查项：
-- ✓ 文件存在性
-- ✓ 数据格式正确性
-- ✓ JSON 序列化
-- ✓ 采样逻辑
-- ✓ I/O 操作
+- ✓ 数据格式正确性（字段完整性、类型检查）
+- ✓ 数据一致性（idx 唯一性、ID 格式、空值检查）
+- ✓ 环境回放验证（可选）
+  - 随机采样数据条目
+  - 使用环境回放专家轨迹
+  - 执行替代动作获取实际 next_state
+  - 对比数据集中的 next_state 与环境返回的 next_state
+- ✓ JSON 格式验证报告生成
 
 ### 分析工具
+
 ```bash
-python3 agent_system/environments/env_package/alfworld/data_generation/D_rollout/analyze_d_rollout.py <文件>
+# 基本分析
+python3 agent_system/environments/env_package/alfworld/data_generation/D_rollout/analyze_d_rollout.py \
+    data/d_rollout/d_rollout.json
+
+# 保存分析报告
+python3 agent_system/environments/env_package/alfworld/data_generation/D_rollout/analyze_d_rollout.py \
+    data/d_rollout/d_rollout.json \
+    --output analysis_report.json
 ```
 
 报告内容：
-- 基本统计
-- 动作分布
-- 结果分析
-- 数据质量
+- 基本统计（条目数、唯一状态数、唯一动作数）
+- 动作分布（最常见的替代动作和专家动作）
+- 步骤分布（每个步骤的数据量）
+- 数据质量检查（缺失字段、空值、重复）
 - 质量评分
 
 ## 与 verl-agent 的集成

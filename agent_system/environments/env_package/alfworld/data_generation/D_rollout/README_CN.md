@@ -146,14 +146,64 @@ python3 -m agent_system.environments.env_package.alfworld.data_generation.D_roll
 - `d_rollout.json`: 主数据文件，包含所有 (s_i, a_j, s_j) 元组
 - `d_rollout_stats.json`: 统计信息文件
 
+## 数据验证
+
+验证生成的数据集格式和质量：
+
+### 基本验证
+
+```bash
+# 验证数据格式和一致性
+python3 agent_system/environments/env_package/alfworld/data_generation/D_rollout/validate_d_rollout.py \
+    data/d_rollout/d_rollout.json
+```
+
+### 环境回放验证
+
+可以选择使用环境回放来验证 `next_state_sji` 的正确性：
+
+```bash
+# 使用环境回放验证（采样5条数据进行验证）
+python3 agent_system/environments/env_package/alfworld/data_generation/D_rollout/validate_d_rollout.py \
+    data/d_rollout/d_rollout.json \
+    --verify_env \
+    --sample_size 5
+
+# 保存验证报告
+python3 agent_system/environments/env_package/alfworld/data_generation/D_rollout/validate_d_rollout.py \
+    data/d_rollout/d_rollout.json \
+    --verify_env \
+    --sample_size 10 \
+    --output validation_report.json
+```
+
+**环境验证功能：**
+- 随机采样指定数量的数据条目
+- 使用 ALFWorld 环境回放专家轨迹
+- 执行替代动作并获取实际的 next_state
+- 对比数据集中保存的 next_state 与环境返回的 next_state
+- 验证数据集的准确性和正确性
+
 ## 数据分析
 
 使用分析工具查看生成的数据集统计信息：
 
 ```bash
+# 基本分析
 python3 agent_system/environments/env_package/alfworld/data_generation/D_rollout/analyze_d_rollout.py \
     data/d_rollout/d_rollout.json
+
+# 保存分析报告
+python3 agent_system/environments/env_package/alfworld/data_generation/D_rollout/analyze_d_rollout.py \
+    data/d_rollout/d_rollout.json \
+    --output analysis_report.json
 ```
+
+**分析功能：**
+- 基本统计信息（条目数、唯一状态数、唯一动作数等）
+- 动作分布分析（最常见的替代动作、专家动作等）
+- 步骤分布分析（每个步骤的数据量）
+- 数据质量检查（缺失字段、空值、重复等）
 
 ## 多GPU使用
 
@@ -208,13 +258,19 @@ python3 agent_system/environments/env_package/alfworld/data_generation/D_rollout
    - 自动处理参数
 
 3. **analyze_d_rollout.py**（数据分析工具）
+   - 支持 JSON 和 JSONL 两种格式
    - 统计信息分析
    - 动作分布分析
+   - 步骤分布分析
    - 数据质量检查
+   - 可生成 JSON 格式的分析报告
 
 4. **validate_d_rollout.py**（验证脚本）
-   - 验证数据格式
-   - 检查数据完整性
+   - 验证数据格式和字段完整性
+   - 检查数据一致性（idx 唯一性、ID 格式等）
+   - 支持环境回放验证 next_state 的正确性
+   - 对比数据集中的 next_state 与环境实际返回的 next_state
+   - 可生成 JSON 格式的验证报告
 
 5. **dexpert_test.json**（示例专家轨迹数据）
    - 包含两个任务的专家轨迹

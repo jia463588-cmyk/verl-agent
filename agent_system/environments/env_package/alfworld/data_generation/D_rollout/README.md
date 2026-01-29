@@ -141,23 +141,64 @@ Generated files are saved in the specified output directory:
 - `d_rollout.json`: Main data file containing all (s_i, a_j, s_j) tuples
 - `d_rollout_stats.json`: Statistics file
 
+## Data Validation
+
+Validate the generated dataset format and quality:
+
+### Basic Validation
+
+```bash
+# Validate data format and consistency
+python3 agent_system/environments/env_package/alfworld/data_generation/D_rollout/validate_d_rollout.py \
+    data/d_rollout/d_rollout.json
+```
+
+### Environment Replay Validation
+
+Optionally verify the correctness of `next_state_sji` using environment replay:
+
+```bash
+# Verify with environment replay (sample 5 entries for validation)
+python3 agent_system/environments/env_package/alfworld/data_generation/D_rollout/validate_d_rollout.py \
+    data/d_rollout/d_rollout.json \
+    --verify_env \
+    --sample_size 5
+
+# Save validation report
+python3 agent_system/environments/env_package/alfworld/data_generation/D_rollout/validate_d_rollout.py \
+    data/d_rollout/d_rollout.json \
+    --verify_env \
+    --sample_size 10 \
+    --output validation_report.json
+```
+
+**Environment validation features:**
+- Randomly sample specified number of data entries
+- Replay expert trajectories using ALFWorld environment
+- Execute alternative actions and obtain actual next_state
+- Compare saved next_state in dataset with environment-returned next_state
+- Verify dataset accuracy and correctness
+
 ## Data Analysis
 
 Use the analysis tool to view dataset statistics:
 
 ```bash
+# Basic analysis
 python3 agent_system/environments/env_package/alfworld/data_generation/D_rollout/analyze_d_rollout.py \
     data/d_rollout/d_rollout.json
+
+# Save analysis report
+python3 agent_system/environments/env_package/alfworld/data_generation/D_rollout/analyze_d_rollout.py \
+    data/d_rollout/d_rollout.json \
+    --output analysis_report.json
 ```
 
-## Data Validation
-
-Validate the generated dataset format:
-
-```bash
-python3 agent_system/environments/env_package/alfworld/data_generation/D_rollout/validate_d_rollout.py \
-    data/d_rollout/d_rollout.json
-```
+**Analysis features:**
+- Basic statistics (entry count, unique states, unique actions, etc.)
+- Action distribution analysis (most common alternative actions, expert actions, etc.)
+- Step distribution analysis (data volume per step)
+- Data quality checks (missing fields, empty values, duplicates, etc.)
 
 ## Tool Files
 
@@ -172,13 +213,19 @@ python3 agent_system/environments/env_package/alfworld/data_generation/D_rollout
    - Handles parameter processing
 
 3. **analyze_d_rollout.py** (data analysis tool)
+   - Supports both JSON and JSONL formats
    - Statistical analysis
    - Action distribution analysis
+   - Step distribution analysis
    - Data quality checks
+   - Can generate JSON format analysis reports
 
 4. **validate_d_rollout.py** (validation script)
-   - Validates data format
-   - Checks data integrity
+   - Validates data format and field completeness
+   - Checks data consistency (idx uniqueness, ID format, etc.)
+   - Supports environment replay validation of next_state correctness
+   - Compares dataset next_state with environment-returned next_state
+   - Can generate JSON format validation reports
 
 5. **dexpert_test.json** (sample expert trajectory data)
    - Contains expert trajectories for two tasks
